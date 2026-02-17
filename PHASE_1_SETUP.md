@@ -805,6 +805,16 @@ git --version
 2. Установи и перезапусти PowerShell
 3. Проверь: `node -v`
 
+**Если Node установлен, но `npm` не находится:**
+1. Закрой все терминалы и открой новый (или перезапусти Cursor) — PATH подхватывается при старте.
+2. В том же терминале проверь PATH:  
+   `$env:Path -split ';' | Where-Object { $_ -match 'nodejs' }`  
+   Должна быть строка `C:\Program Files\nodejs`. Если нет — добавь в текущую сессию:  
+   `$env:Path = "C:\Program Files\nodejs;" + $env:Path`
+3. Если ошибка про выполнение скриптов (PowerShell):  
+   `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
+4. После этого снова выполни `npm -v`.
+
 ---
 
 ## Шаг 2: Создание Vite проекта
