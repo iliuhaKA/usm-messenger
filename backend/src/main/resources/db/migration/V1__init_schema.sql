@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS USERS (
-    id BIGSERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     idnp VARCHAR(13) UNIQUE NOT NULL,
     password_hash VARCHAR(255),
     first_name VARCHAR(100) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS USERS (
 );
 
 CREATE TABLE IF NOT EXISTS chats (
-    id BIGSERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     type VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS chats (
 
 
 CREATE TABLE IF NOT EXISTS chats_members (
-    id BIGSERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
     chat_id BIGINT REFERENCES CHATS(id) ON DELETE CASCADE,
     role VARCHAR(20) DEFAULT 'MEMBER',
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS chats_members (
 
 
 CREATE TABLE IF NOT EXISTS messages (
-    id BIGSERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     chat_id BIGINT REFERENCES chats(id) ON DELETE CASCADE,
     sender_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
     content TEXT,
@@ -76,16 +76,12 @@ CREATE TABLE IF NOT EXISTS folders (
 
 CREATE TABLE IF NOT EXISTS chats_folders (
     folder_id BIGINT REFERENCES folders(id) ON DELETE CASCADE,
-    chat_id BIGINT REFERENCES chats(id) ON DELTE CASCADE,
+    chat_id BIGINT REFERENCES chats(id) ON DELETE CASCADE,
     PRIMARY KEY (folder_id, chat_id)
 );
 
 
 CREATE INDEX idx_messages_chat_id ON messages(chat_id);
-CREATE INDEX idx_messages_created_at ON mwssages(created_at DESC);
+CREATE INDEX idx_messages_created_at ON messages(created_at DESC);
 CREATE INDEX idx_chat_members_user_id ON chats_members(user_id);
 CREATE INDEX idx_users_idnp ON users(idnp);
-
-INSERT INTO users (idnp, first_name, last_name, role, is_password_set)
-VALUES ('2001123456789', 'Admin', 'User', 'ADMIN', FALSE)
-on CONFLICT DO NOTHING;

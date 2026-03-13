@@ -19,9 +19,8 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data @AllArgsConstructor @Builder
 @Entity @Table(name = "chats_members", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "chat_id"}))
 public class ChatMember {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;

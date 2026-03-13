@@ -21,9 +21,8 @@ import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data @AllArgsConstructor @Builder
 @Entity @Table(name = "chats")
 public class Chat {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
@@ -35,7 +34,8 @@ public class Chat {
     String description;
 
     @OneToMany(mappedBy = "chat", fetch = FetchType.LAZY)
-    private List<ChatMember> members = new ArrayList<>();
+
+    final private List<ChatMember> members = new ArrayList<>();
 }
 
 
