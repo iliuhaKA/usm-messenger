@@ -1,5 +1,6 @@
 package com.usm.messenger.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.usm.messenger.entity.enums.ChatTypes;
@@ -18,6 +19,7 @@ public class ChatResponse {
     private int unreadCount;
     private boolean isPinned;
     private boolean isMuted;
+    private LocalDateTime createdAt;
     private int memberCount;
 
     private List<UserResponse> members;

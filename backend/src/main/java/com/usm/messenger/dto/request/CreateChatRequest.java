@@ -20,6 +20,6 @@ public class CreateChatRequest {
 
     private String description;
 
-    @NotNull(message = "membersIds is required")
-    private List<Long> membersIds;
+    @NotNull(message = "memberIds is required")
+    private List<Long> memberIds;
 }
