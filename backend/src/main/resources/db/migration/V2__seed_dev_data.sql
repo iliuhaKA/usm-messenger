@@ -11,10 +11,9 @@ VALUES
   ('Programare Web', 'GROUP', 1, 'Чат группы по веб-программированию'),
   ('Baze de Date', 'GROUP', 1, 'Чат группы по базам данных'),
   ('Matematica Discretă', 'GROUP', 1, 'Чат группы по дискретной математике'),
-  ('Anunțuri Facultate', 'CHANNEL', 1, 'Объявления факультета')
-ON CONFLICT DO NOTHING;
+  ('Anunțuri Facultate', 'CHANNEL', 1, 'Объявления факультета');
 
-INSERT INTO chat_members (user_id, chat_id, role)
+INSERT INTO chats_members (user_id, chat_id, role)
 VALUES
   (1, 1, 'ADMIN'), (2, 1, 'MEMBER'), (3, 1, 'MEMBER'), (4, 1, 'ADMIN'),
   (1, 2, 'ADMIN'), (2, 2, 'MEMBER'), (3, 2, 'MEMBER'),
