@@ -35,7 +35,8 @@ public class Chat {
 
     @OneToMany(mappedBy = "chat", fetch = FetchType.LAZY)
 
-    final private List<ChatMember> members = new ArrayList<>();
+    @Builder.Default
+    private final List<ChatMember> members = new ArrayList<>();
 }
 
 
