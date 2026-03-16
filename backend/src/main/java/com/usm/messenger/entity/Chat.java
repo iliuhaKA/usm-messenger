@@ -21,8 +21,9 @@ import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Data @AllArgsConstructor @Builder
+@Data @AllArgsConstructor @NoArgsConstructor @Builder
 @Entity @Table(name = "chats")
 public class Chat {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
