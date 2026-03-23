@@ -13,10 +13,10 @@
 
 1. [Как работает mock-авторизация в этой фазе](#как-работает-mock-авторизация-в-этой-фазе)
 2. [Задачи Ильи](#задачи-ильи)
-   - [0. Подготовка: багфиксы и инфраструктура](#0-подготовка-багфиксы-и-инфраструктура)
-   - [Фича A: Ядро чатов + Список чатов](#фича-a-ядро-чатов--список-чатов)
+  - [0. Подготовка: багфиксы и инфраструктура](#0-подготовка-багфиксы-и-инфраструктура)
+  - [Фича A: Ядро чатов + Список чатов](#фича-a-ядро-чатов--список-чатов)
 3. [Задачи Марии](#задачи-марии)
-   - [Фича B: UI-компоненты, Layout и экран чата](#фича-b-ui-компоненты-layout-и-экран-чата)
+  - [Фича B: UI-компоненты, Layout и экран чата](#фича-b-ui-компоненты-layout-и-экран-чата)
 4. [Интеграция и тестирование](#интеграция-и-тестирование)
 5. [Зависимости между задачами](#зависимости-между-задачами)
 6. [Рекомендуемый порядок по дням](#рекомендуемый-порядок-по-дням)
@@ -52,11 +52,11 @@ GET /api/users → [{ id: 1, firstName: "Admin", ... }, ...]
 **Frontend (делает Илья в рамках подготовки):**
 
 1. Страница `/login` — показывает dropdown со списком пользователей из БД.
-   Пользователь выбирает себя → нажимает «Войти» → редирект на `/chat`.
+  Пользователь выбирает себя → нажимает «Войти» → редирект на `/chat`.
 2. Zustand-стор `authStore` — хранит выбранного пользователя в state и
-   localStorage (чтобы при перезагрузке не выбирать заново).
+  localStorage (чтобы при перезагрузке не выбирать заново).
 3. Все API-запросы передают `userId` как query-параметр:
-   `GET /api/chats?userId=2` — это временная замена JWT.
+  `GET /api/chats?userId=2` — это временная замена JWT.
 
 ### Что НЕ нужно реализовывать
 
@@ -69,19 +69,22 @@ GET /api/users → [{ id: 1, firstName: "Admin", ... }, ...]
 ### Когда уберём mock
 
 В Фазе 2, когда реализуем настоящую аутентификацию:
+
 - Заменим dropdown на форму логина (IDNP + пароль)
 - Уберём `?userId=` из всех API — вместо этого userId будет извлекаться из
-  JWT-токена на бэкенде
+JWT-токена на бэкенде
 - `authStore` будет хранить токен вместо объекта пользователя
 
 ### Объём кода mock-авторизации
 
-| Что | Где | Строк кода |
-|-----|-----|-----------|
-| GET /api/users | UserController.java | ~5 |
-| Страница выбора | MockLoginPage.tsx | ~40 |
-| authStore | authStore.ts | ~25 |
-| **Итого** | | **~70 строк** |
+
+| Что             | Где                 | Строк кода    |
+| --------------- | ------------------- | ------------- |
+| GET /api/users  | UserController.java | ~5            |
+| Страница выбора | MockLoginPage.tsx   | ~40           |
+| authStore       | authStore.ts        | ~25           |
+| **Итого**       |                     | **~70 строк** |
+
 
 Это минимально необходимый объём, который потом легко заменить.
 
@@ -104,10 +107,10 @@ GET /api/users → [{ id: 1, firstName: "Admin", ... }, ...]
 
 1. **Переименовать файл**: `V1_init_schema.sql` → `V1__init_schema.sql` (два подчёркивания — требование Flyway)
 2. **Двойные кавычки → одинарные** для строковых значений по умолчанию:
-   - `DEFAULT "STUDENT"` → `DEFAULT 'STUDENT'`
-   - `DEFAULT "MEMBER"` → `DEFAULT 'MEMBER'`
-   - `DEFAULT "TEXT"` → `DEFAULT 'TEXT'`
-   - `DEFAULT "#24513C"` → `DEFAULT '#24513C'`
+  - `DEFAULT "STUDENT"` → `DEFAULT 'STUDENT'`
+  - `DEFAULT "MEMBER"` → `DEFAULT 'MEMBER'`
+  - `DEFAULT "TEXT"` → `DEFAULT 'TEXT'`
+  - `DEFAULT "#24513C"` → `DEFAULT '#24513C'`
 3. **Пустой DEFAULT**: `joined_at TIMESTAMP DEFAULT,` → `joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,`
 4. **Дублирование CREATE**: `CREATE CREATE TABLE` → `CREATE TABLE`
 5. **Опечатки**: `ON DELTE CASCADE` → `ON DELETE CASCADE`, `ON mwssages` → `ON messages`
@@ -162,6 +165,7 @@ GET /api/users → [{ id: 1, firstName: "Admin", ... }, ...]
 **Файлы**: `frontend/src/App.tsx`, `frontend/App.tsx`, `frontend/index.html`
 
 **Проблемы:**
+
 - `src/App.tsx` — стандартный шаблон Vite (счётчик кликов), не используется роутинг
 - `frontend/App.tsx` (вне src/) — кастомный App с React Router, но он не подключён
 - `index.html` — заголовок "frontend", шрифт Inter не подключён
@@ -237,6 +241,7 @@ ON CONFLICT (user_id, chat_id) DO NOTHING;
 **Backend:**
 
 Добавить в `UserController` (который будет создан в A.5) метод:
+
 ```java
 @GetMapping
 public List<UserResponse> getAllUsers() {
@@ -259,10 +264,10 @@ interface AuthState {
 Хранит выбранного пользователя. Использует `persist` middleware из Zustand,
 чтобы при обновлении страницы данные сохранялись в localStorage.
 
-2. `src/pages/MockLoginPage.tsx`:
-   - При загрузке — `GET /api/users` → получить список пользователей
-   - Показать dropdown с именами
-   - Кнопка «Войти» → сохранить в authStore → navigate('/chat')
+1. `src/pages/MockLoginPage.tsx`:
+  - При загрузке — `GET /api/users` → получить список пользователей
+  - Показать dropdown с именами
+  - Кнопка «Войти» → сохранить в authStore → navigate('/chat')
 
 **Ход выполнения:**
 
@@ -288,6 +293,7 @@ interface AuthState {
 #### A.1 JPA-сущности (Backend)
 
 **Файлы:**
+
 - `backend/src/main/java/com/usm/messenger/entity/User.java`
 - `backend/src/main/java/com/usm/messenger/entity/Chat.java`
 - `backend/src/main/java/com/usm/messenger/entity/ChatMember.java`
@@ -326,6 +332,7 @@ interface AuthState {
 ```
 
 **Важные моменты:**
+
 - Имена таблиц и колонок должны точно совпадать с миграцией V1
 - Для `createdAt` использовать `@Column(name = "created_at")` + `@CreationTimestamp`
 - Для связей использовать `FetchType.LAZY`
@@ -335,6 +342,7 @@ interface AuthState {
 #### A.2 Репозитории (Backend)
 
 **Файлы:**
+
 - `backend/src/main/java/com/usm/messenger/repository/UserRepository.java`
 - `backend/src/main/java/com/usm/messenger/repository/ChatRepository.java`
 - `backend/src/main/java/com/usm/messenger/repository/ChatMemberRepository.java`
@@ -368,6 +376,7 @@ interface AuthState {
 #### A.3 DTO-объекты (Backend)
 
 **Файлы:**
+
 - `backend/src/main/java/com/usm/messenger/dto/response/UserResponse.java`
 - `backend/src/main/java/com/usm/messenger/dto/response/ChatListItemResponse.java`
 - `backend/src/main/java/com/usm/messenger/dto/response/ChatResponse.java`
@@ -390,6 +399,7 @@ interface AuthState {
 #### A.4 Сервисы и исключения (Backend)
 
 **Файлы:**
+
 - `backend/src/main/java/com/usm/messenger/service/ChatService.java`
 - `backend/src/main/java/com/usm/messenger/service/UserService.java`
 - `backend/src/main/java/com/usm/messenger/exception/ChatNotFoundException.java`
@@ -438,6 +448,7 @@ interface AuthState {
 #### A.5 Контроллеры (Backend)
 
 **Файлы:**
+
 - `backend/src/main/java/com/usm/messenger/controller/ChatController.java`
 - `backend/src/main/java/com/usm/messenger/controller/UserController.java`
 
@@ -471,6 +482,7 @@ interface AuthState {
 #### A.6 Frontend: типы, API-клиент, стор, хуки (Frontend)
 
 **Файлы:**
+
 - `frontend/src/types/chat.types.ts`
 - `frontend/src/api/chats.api.ts`
 - `frontend/src/api/users.api.ts`
@@ -508,6 +520,7 @@ interface AuthState {
 #### A.7 Компоненты ChatItem и ChatList (Frontend)
 
 **Файлы:**
+
 - `frontend/src/components/chat/ChatItem.tsx`
 - `frontend/src/components/chat/ChatList.tsx`
 
@@ -558,6 +571,7 @@ interface AuthState {
 #### B.1 Базовые UI-компоненты (Frontend)
 
 **Файлы:**
+
 - `frontend/src/components/ui/Button.tsx`
 - `frontend/src/components/ui/Input.tsx`
 - `frontend/src/components/ui/Avatar.tsx`
@@ -593,6 +607,7 @@ Tailwind — это CSS-фреймворк, где стили задаются �
 ```
 
 Часто используемые классы Tailwind:
+
 - `bg-...` — цвет фона (`bg-primary`, `bg-white`, `bg-red-500`)
 - `text-...` — цвет и размер текста (`text-white`, `text-sm`, `text-lg`)
 - `p-...`, `px-...`, `py-...` — padding (отступ внутри)
@@ -1019,7 +1034,7 @@ Sidebar состоит из трёх секций, расположенных в
 - `h-full` — высота 100% родителя
 - `flex-1` — занять всё свободное место (между header и footer)
 - `overflow-y-auto` — если содержимого больше, чем вмещается, появится
-  вертикальный скролл
+вертикальный скролл
 
 ##### Ход выполнения
 
@@ -1140,6 +1155,7 @@ Sidebar состоит из трёх секций, расположенных в
 #### B.6 Страница чата — ChatPage и ChatHeader (Frontend)
 
 **Файлы:**
+
 - `frontend/src/pages/ChatPage.tsx`
 - `frontend/src/components/chat/ChatHeader.tsx`
 
@@ -1160,6 +1176,7 @@ function ChatPage() {
 ```
 
 Это работает, потому что в маршруте мы написали `:chatId`:
+
 ```tsx
 <Route path=":chatId" element={<ChatPage />} />
 ```
@@ -1358,7 +1375,7 @@ TanStack Query сам управляет loading/error, кэширует дан�
 - `z-50` — поверх всего остального
 - `bg-black/50` — чёрный фон с 50% прозрачности
 - `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2` —
-  центрирование карточки
+центрирование карточки
 
 ##### Немного теории: useState для формы
 
@@ -1513,6 +1530,7 @@ public class UserController {
 ```
 
 Аннотации:
+
 - `@RestController` — говорит Spring: «это контроллер, возвращает JSON»
 - `@RequestMapping("/api/users")` — базовый путь
 - `@GetMapping("/search")` — этот метод обрабатывает `GET /api/users/search`
@@ -1724,28 +1742,31 @@ A.7 ChatItem + ChatList ──────┘   B.8 User search endpoint (backen
 
 ## Рекомендуемый порядок по дням
 
-| День | Илья | Мария |
-|------|------|-------|
-| 1 | 0.1 Fix миграции, 0.2 Fix CORS, 0.3 Fix App.tsx, 0.4 Seed data, 0.5 Mock auth | B.1 UI-компоненты (Button, Input, Avatar, Badge, Spinner) + cn() утилита |
-| 2 | A.1 Entities, A.2 Repos, A.3 DTOs | B.2 uiStore, B.3 MainLayout, B.4 Sidebar, B.5 NoChatSelected |
-| 3 | A.4 Services, A.5 Controllers | B.6 ChatPage + ChatHeader, B.8 User search endpoint |
-| 4 | A.6 FE types/API/store/hooks, A.7 ChatItem + ChatList | B.7 CreateChatModal, B.9 users.api.ts |
-| 5 | Интеграция: подключить ChatList → Sidebar, полный прогон, баг-фиксы | Интеграция: подключить CreateChatModal, тестирование, баг-фиксы |
+
+| День | Илья                                                                          | Мария                                                                    |
+| ---- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1    | 0.1 Fix миграции, 0.2 Fix CORS, 0.3 Fix App.tsx, 0.4 Seed data, 0.5 Mock auth | B.1 UI-компоненты (Button, Input, Avatar, Badge, Spinner) + cn() утилита |
+| 2    | A.1 Entities, A.2 Repos, A.3 DTOs                                             | B.2 uiStore, B.3 MainLayout, B.4 Sidebar, B.5 NoChatSelected             |
+| 3    | A.4 Services, A.5 Controllers                                                 | B.6 ChatPage + ChatHeader, B.8 User search endpoint                      |
+| 4    | A.6 FE types/API/store/hooks, A.7 ChatItem + ChatList                         | B.7 CreateChatModal, B.9 users.api.ts                                    |
+| 5    | Интеграция: подключить ChatList → Sidebar, полный прогон, баг-фиксы           | Интеграция: подключить CreateChatModal, тестирование, баг-фиксы          |
+
 
 ---
 
 ## Критерии готовности фазы
 
-- [ ] Backend: GET /api/users, GET /api/users/search?q=, GET /api/users/{id}
-- [ ] Backend: GET /api/chats?userId=, GET /api/chats/{id}?userId=, POST /api/chats?userId=
-- [ ] Backend: GET /api/chats/{id}/members, PATCH pin, PATCH mute
-- [ ] Frontend: mock-логин (выбор пользователя из списка)
-- [ ] Frontend: MainLayout (sidebar + chat area)
-- [ ] Frontend: список чатов загружается и отображается
-- [ ] Frontend: при клике на чат — ChatPage с ChatHeader
-- [ ] Frontend: модалка создания чата работает
-- [ ] Frontend: страница NoChatSelected при отсутствии выбранного чата
-- [ ] Frontend: все UI-компоненты созданы и стилизованы (Button, Input, Avatar, Badge, Spinner)
-- [ ] Интеграция: фронтенд и бэкенд работают вместе
-- [ ] Код: нет ошибок в консоли, нет ESLint/TypeScript warnings
-- [ ] Git: все изменения в ветке development
+- Backend: GET /api/users, GET /api/users/search?q=, GET /api/users/{id}
+- Backend: GET /api/chats?userId=, GET /api/chats/{id}?userId=, POST /api/chats?userId=
+- Backend: GET /api/chats/{id}/members, PATCH pin, PATCH mute
+- Frontend: mock-логин (выбор пользователя из списка)
+- Frontend: MainLayout (sidebar + chat area)
+- Frontend: список чатов загружается и отображается
+- Frontend: при клике на чат — ChatPage с ChatHeader
+- Frontend: модалка создания чата работает
+- Frontend: страница NoChatSelected при отсутствии выбранного чата
+- Frontend: все UI-компоненты созданы и стилизованы (Button, Input, Avatar, Badge, Spinner)
+- Интеграция: фронтенд и бэкенд работают вместе
+- Код: нет ошибок в консоли, нет ESLint/TypeScript warnings
+- Git: все изменения в ветке development
+
