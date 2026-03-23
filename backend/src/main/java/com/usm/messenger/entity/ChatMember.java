@@ -31,4 +31,5 @@ public class ChatMember {
     @Column(name = "joined_at") LocalDateTime joinedAt;
     @Column(name = "is_pinned") Boolean isPinned;
     @Column(name = "is_muted") Boolean isMuted;
+    @Column(name = "last_read_at") LocalDateTime lastReadAt;
 }

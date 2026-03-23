@@ -1,7 +1,5 @@
 package com.usm.messenger.controller;
 
-import java.util.List;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,13 +9,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 import com.usm.messenger.dto.request.CreateChatRequest;
 import com.usm.messenger.dto.request.MuteRequest;
 import com.usm.messenger.dto.request.PinRequest;
+import com.usm.messenger.dto.request.SendMessageRequest;
 import com.usm.messenger.dto.response.ChatListItemResponse;
 import com.usm.messenger.dto.response.ChatResponse;
+import com.usm.messenger.dto.response.MessageResponse;
 import com.usm.messenger.dto.response.UserResponse;
 import com.usm.messenger.service.ChatService;
+import com.usm.messenger.service.MessageService;
+
+import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatController {
     
     private final ChatService chatService;
+    private final MessageService messageService;
 
     @GetMapping
     public List<ChatListItemResponse> getChats(@RequestParam Long userId) {
@@ -54,6 +60,25 @@ public class ChatController {
     @PatchMapping("/{id}/mute")
     public void muteChat(@PathVariable Long id, @RequestParam Long userId, @RequestBody MuteRequest body) {
         chatService.muteChat(id, userId, body.isMuted());
+    }
+
+    @GetMapping("/{chatId}/messages")
+    public List<MessageResponse> getMessages(@PathVariable Long chatId, @RequestParam Long userId) {
+        return messageService.getMessages(chatId, userId);
+    }
+
+    @PostMapping("/{chatId}/messages")
+    public MessageResponse sendMessage(
+        @PathVariable Long chatId,
+        @RequestParam Long userId,
+        @Valid @RequestBody SendMessageRequest body
+    ) {
+        return messageService.sendMessage(chatId, userId, body);
+    }
+
+    @PostMapping("/{chatId}/read")
+    public void markRead(@PathVariable Long chatId, @RequestParam Long userId) {
+        messageService.markChatAsRead(chatId, userId);
     }
 
 }

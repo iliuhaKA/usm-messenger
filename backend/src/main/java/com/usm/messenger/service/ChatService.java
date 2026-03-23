@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.usm.messenger.dto.request.CreateChatRequest;
 import com.usm.messenger.dto.response.ChatListItemResponse;
@@ -18,6 +19,7 @@ import com.usm.messenger.exception.AccessDeniedException;
 import com.usm.messenger.exception.UserNotFoundException;
 import com.usm.messenger.repository.ChatMemberRepository;
 import com.usm.messenger.repository.ChatRepository;
+import com.usm.messenger.repository.MessageRepository;
 import com.usm.messenger.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -29,7 +31,9 @@ public class ChatService {
     private final ChatMemberRepository chatMemberRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final MessageRepository messageRepository;
 
+    @Transactional(readOnly = true)
     public List<ChatListItemResponse> getChatsByUserId(Long userId) {
         List<ChatMember> memberships = chatMemberRepository.findByUserId(userId);
         return memberships.stream()
@@ -49,15 +53,24 @@ public class ChatService {
         dto.setName(chat.getName());
         dto.setType(chat.getType());
         dto.setAvatarUrl(chat.getAvatarUrl());
-        dto.setLastMessage(null);
-        dto.setLastMessageTime(chat.getCreatedAt());
-        dto.setUnreadCount(0);
+        LocalDateTime since = cm.getLastReadAt() != null ? cm.getLastReadAt() : LocalDateTime.MIN;
+        dto.setUnreadCount((int) messageRepository.countIncomingUnreadAfter(chat.getId(), cm.getUser().getId(), since));
         dto.setPinned(Boolean.TRUE.equals(cm.getIsPinned()));
         dto.setMuted(Boolean.TRUE.equals(cm.getIsMuted()));
         dto.setMemberCount(chat.getMembers().size());
+
+        messageRepository.findFirstByChat_IdOrderByCreatedAtDesc(chat.getId()).ifPresentOrElse(last -> {
+            dto.setLastMessage(last.getContent());
+            dto.setLastMessageTime(last.getCreatedAt());
+        }, () -> {
+            dto.setLastMessage(null);
+            dto.setLastMessageTime(chat.getCreatedAt());
+        });
+
         return dto;
     }
 
+    @Transactional(readOnly = true)
     public ChatResponse getChatById(Long chatId, Long userId) {
         ChatMember membership = chatMemberRepository.findByUserIdAndChatId(userId, chatId)
             .orElseThrow( () -> new AccessDeniedException("Access denied to chat: " + chatId));
@@ -72,7 +85,8 @@ public class ChatService {
         dto.setDescription(chat.getDescription());
         dto.setAvatarUrl(chat.getAvatarUrl());
         dto.setCreatedAt(chat.getCreatedAt());
-        dto.setUnreadCount(0);
+        LocalDateTime since = membership.getLastReadAt() != null ? membership.getLastReadAt() : LocalDateTime.MIN;
+        dto.setUnreadCount((int) messageRepository.countIncomingUnreadAfter(chatId, userId, since));
         dto.setPinned(Boolean.TRUE.equals(membership.getIsPinned()));
         dto.setMuted(Boolean.TRUE.equals(membership.getIsMuted()));
         dto.setMemberCount(chat.getMembers().size());
@@ -106,6 +120,7 @@ public class ChatService {
             .joinedAt(LocalDateTime.now())
             .isPinned(false)
             .isMuted(false)
+            .lastReadAt(LocalDateTime.now())
             .build();
         
         chatMemberRepository.save(creatorMember);
@@ -122,6 +137,7 @@ public class ChatService {
                 .joinedAt(LocalDateTime.now())
                 .isPinned(false)
                 .isMuted(false)
+                .lastReadAt(LocalDateTime.now())
                 .build();
             
             chatMemberRepository.save(cm);

@@ -180,15 +180,33 @@ interface User {
 
 ---
 
-## Приложение: фактические эндпоинты (заполнить по команде)
+## Приложение: фактические эндпоинты и демо-учётки
 
-_После деплоя бэкенда впишите сюда для Марии и ревью:_
+**База API:** `http://localhost:8080/api` (или `VITE_API_URL` на фронте).
+
+**Демо-пароль для всех пользователей из seed (после миграции V3):** `Demo123!`
+
+| Логин | Пароль | Примечание |
+|--------|--------|------------|
+| `ana.popescu@usm.md` | `Demo123!` | email |
+| `admin@usm.md` | `Demo123!` | |
+| `ion.munteanu@usm.md` | `Demo123!` | |
+| `victor.ceban@usm.md` | `Demo123!` | |
+| IDNP `2001123456789` | `Demo123!` | если вводите без `@` |
 
 ```
 GET  /api/health
-POST /api/auth/login   — body: ...
+POST /api/auth/login          — body: { "login": "<email sau idnp>", "password": "..." } → 200 UserResponse / 401 { "message" }
+GET  /api/users/search?q=    — căutare utilizatori
 GET  /api/chats?userId=
 GET  /api/chats/{id}?userId=
-POST /api/chats?userId=
-...
+POST /api/chats?userId=       — body CreateChatRequest
+GET  /api/chats/{id}/members?userId=
+PATCH /api/chats/{id}/pin?userId=    — body { "pinned": bool }
+PATCH /api/chats/{id}/mute?userId=   — body { "muted": bool }
+GET  /api/chats/{chatId}/messages?userId=
+POST /api/chats/{chatId}/messages?userId= — body { "content": "..." }
+POST /api/chats/{chatId}/read?userId=     — пометить чат прочитанным (last_read_at)
 ```
+
+**WebSocket (STOMP + SockJS):** подключение к `{origin}/ws` (origin = тот же хост, что и API, без `/api`). Топик новых сообщений: `/topic/chats/{chatId}/messages` (тело — JSON `MessageResponse`). Брокер in-memory — один инстанс backend; для кластера нужен RabbitMQ/Redis.
