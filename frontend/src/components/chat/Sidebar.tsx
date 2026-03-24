@@ -86,9 +86,9 @@ export function Sidebar() {
         <div className="flex items-center justify-between gap-2 border-b border-black/5 px-4 py-4">
           <div className="flex min-w-0 items-center gap-2">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-lg font-bold text-white">
-              U
+              <img src="/usm.png" alt="USM logo" className="h-8 w-8 object-contain" />
             </div>
-            <span className="truncate text-lg font-semibold text-primary">USMchat</span>
+            <span className="truncate text-lg font-semibold text-primary">USMessenger</span>
           </div>
           <button
             type="button"

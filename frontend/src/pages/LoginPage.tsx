@@ -47,7 +47,7 @@ export function LoginPage() {
 
       <div className="relative z-10 w-full max-w-md rounded-3xl bg-white px-8 py-10 shadow-2xl">
         <div className="mb-6 flex flex-col items-center text-center">
-          <img src="/usm-logo.svg" alt="" className="mb-4 h-14 w-14" />
+          <img src="/usm.png" alt="" className="mb-4 h-14 w-14" />
           <h1 className="text-xl font-bold text-text-main">Войти в систему</h1>
         </div>
 
