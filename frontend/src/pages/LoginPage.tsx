@@ -35,13 +35,9 @@ export function LoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--color-login-bg)] px-4 py-10">
       <div
-        className="pointer-events-none absolute inset-0 opacity-40"
+        className="pointer-events-none absolute inset-0 opacity-40 bg-center"
         style={{
-          backgroundImage: `
-            linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.06) 40%, rgba(255,255,255,0.06) 45%, transparent 45%),
-            linear-gradient(225deg, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 55%, transparent 55%),
-            linear-gradient(315deg, rgba(0,0,0,0.12) 0%, transparent 60%)
-          `,
+          backgroundImage: "url('/usm-bg.png')",
         }}
       />
 

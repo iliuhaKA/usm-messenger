@@ -23,7 +23,7 @@ export function MessageList({
 
   if (loading && messages.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-text-muted">Se încarcă mesajele…</div>
+      <div className="flex flex-1 items-center justify-center text-text-muted">Загрузка сообщений...</div>
     );
   }
 
@@ -34,7 +34,7 @@ export function MessageList({
           const mine = m.senderId === currentUserId;
           const label = mine
             ? currentUserLabel
-            : [m.senderFirstName, m.senderLastName].filter(Boolean).join(' ') || 'Utilizator';
+            : [m.senderFirstName, m.senderLastName].filter(Boolean).join(' ') || 'Пользователь';
           const time = formatMessageTime(m.createdAt);
 
           return (
@@ -58,7 +58,7 @@ export function MessageList({
                   )}
                 >
                   <span className="font-medium text-text-main">{label}</span>
-                  <span>{time}</span>
+                  <span className="text-text-main">{time}</span>
                 </div>
                 <div
                   className={cn(
