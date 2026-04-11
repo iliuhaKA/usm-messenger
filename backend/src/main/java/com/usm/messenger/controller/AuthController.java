@@ -1,5 +1,6 @@
 package com.usm.messenger.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +22,7 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public UserResponse login(@Valid @RequestBody LoginRequest request) {
-        return userService.authenticate(request);
+    public ResponseEntity<UserResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(userService.authenticate(request));
     }
 }

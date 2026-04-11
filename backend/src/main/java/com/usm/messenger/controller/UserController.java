@@ -2,6 +2,7 @@ package com.usm.messenger.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,17 +21,17 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/{id}")
-    public UserResponse getUserById(@PathVariable Long id)  {
-        return userService.getUserById(id);
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id)  {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @GetMapping("/search")
-    public List<UserResponse> searchUsers(@RequestParam(name = "q") String query) {
-        return userService.searchUsers(query);
+    public ResponseEntity<List<UserResponse>> searchUsers(@RequestParam(name = "q") String query) {
+        return ResponseEntity.ok(userService.searchUsers(query));
     }
 }
