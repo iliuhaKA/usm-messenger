@@ -18,8 +18,15 @@ export function useMessages(chatId: number | null, userId: number | null) {
 export function useSendMessage(userId: number | null) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ chatId, content }: { chatId: number; content: string }) =>
-      sendMessage(chatId, content),
+    mutationFn: ({
+      chatId,
+      content,
+      attachmentId,
+    }: {
+      chatId: number;
+      content: string;
+      attachmentId?: number | null;
+    }) => sendMessage(chatId, content, attachmentId ?? null),
     onSuccess: (msg, { chatId }) => {
       qc.setQueryData<Message[]>(['messages', chatId, userId!], (old) => {
         if (!old) return [msg];

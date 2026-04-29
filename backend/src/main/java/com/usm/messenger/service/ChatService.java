@@ -55,6 +55,7 @@ public class ChatService {
         dto.setName(chat.getName());
         dto.setType(chat.getType());
         dto.setAvatarUrl(chat.getAvatarUrl());
+        dto.setAvatarFileId(chat.getAvatarFileId());
         LocalDateTime since = cm.getLastReadAt() != null ? cm.getLastReadAt() : LocalDateTime.MIN;
         dto.setUnreadCount((int) messageRepository.countIncomingUnreadAfter(chat.getId(), cm.getUser().getId(), since));
         dto.setPinned(Boolean.TRUE.equals(cm.getIsPinned()));
@@ -86,6 +87,7 @@ public class ChatService {
         dto.setType(chat.getType());
         dto.setDescription(chat.getDescription());
         dto.setAvatarUrl(chat.getAvatarUrl());
+        dto.setAvatarFileId(chat.getAvatarFileId());
         dto.setCreatedAt(chat.getCreatedAt());
         LocalDateTime since = membership.getLastReadAt() != null ? membership.getLastReadAt() : LocalDateTime.MIN;
         dto.setUnreadCount((int) messageRepository.countIncomingUnreadAfter(chatId, userId, since));

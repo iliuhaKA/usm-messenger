@@ -18,6 +18,7 @@ public class ChatResponse {
     private ChatTypes type;
     private String description;
     private String avatarUrl;
+    private String avatarFileId;
     private int unreadCount;
     private boolean isPinned;
     private boolean isMuted;

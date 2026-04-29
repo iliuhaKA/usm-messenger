@@ -12,10 +12,11 @@ import lombok.NoArgsConstructor;
 public class UserResponse {
     private Long id;
     private String idnp;
-    private String firstName; 
+    private String firstName;
     private String lastName;
     private String email;
     private UserRoles role;
     private String avatarUrl;
-    private LocalDateTime lastSeen; 
+    private String avatarFileId;
+    private LocalDateTime lastSeen;
 }

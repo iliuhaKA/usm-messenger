@@ -29,6 +29,7 @@ public class User {
     String email;
     @Enumerated(EnumType.STRING) UserRoles role;
     @Column(name = "avatar_url") String avatarUrl;
+    @Column(name = "avatar_file_id") String avatarFileId;
     @Column(name = "created_at") LocalDateTime createdAt;
     @Column(name = "last_seen") LocalDateTime lastSeen;
     @Column(name = "is_password_set") Boolean isPasswordSet;

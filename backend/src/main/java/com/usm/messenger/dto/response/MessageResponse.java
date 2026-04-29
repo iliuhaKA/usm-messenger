@@ -18,6 +18,8 @@ public class MessageResponse {
     private Long senderId;
     private String senderFirstName;
     private String senderLastName;
+    private String senderAvatarFileId;
     private String content;
     private LocalDateTime createdAt;
+    private AttachmentResponse attachment;
 }

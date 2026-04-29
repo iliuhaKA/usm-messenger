@@ -2,6 +2,7 @@ import { MoreVertical } from 'lucide-react';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { Avatar } from '../components/Avatar';
 import { MessageComposer } from '../components/chat/MessageComposer';
 import { MessageList } from '../components/chat/MessageList';
 import { useChat } from '../hooks/useChats';
@@ -37,28 +38,24 @@ export function ChatPage() {
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('/Friren.jpg')",
-          filter: 'blur(6px)',
-        }}
-      />
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--color-chat-bg)]">
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
         <header className="flex shrink-0 items-center gap-3 border-b border-black/5 bg-white px-4 py-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-lg font-semibold text-primary">
-            {chat?.name?.slice(0, 1).toUpperCase() ?? '?'}
-          </div>
+          <Avatar
+            name={chat?.name ?? '?'}
+            fileId={chat?.avatarFileId}
+            url={chat?.avatarUrl}
+            size="md"
+          />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate font-semibold text-text-main">{chatLoading ? '…' : chat?.name}</h1>
-            <p className="flex items-center gap-1.5 text-sm text-emerald-600">
-              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-              Онлайн
+            <h1 className="truncate font-semibold text-text-main">
+              {chatLoading ? '…' : chat?.name}
+            </h1>
+            <p className="text-sm text-text-muted">
+              {chat?.memberCount ?? 0} {chat?.memberCount === 1 ? 'участник' : 'участников'}
             </p>
           </div>
-          <button type="button" className="rounded-lg p-2 hover:bg-black/5" aria-label="Menu">
+          <button type="button" className="rounded-lg p-2 hover:bg-black/5" aria-label="Меню">
             <MoreVertical className="h-5 w-5 text-text-muted" />
           </button>
         </header>
@@ -66,9 +63,7 @@ export function ChatPage() {
         <MessageList
           messages={messages ?? []}
           currentUserId={user?.id ?? 0}
-          currentUserLabel={
-            user ? `${user.firstName} ${user.lastName}`.trim() : 'Tu'
-          }
+          currentUserLabel={user ? `${user.firstName} ${user.lastName}`.trim() : 'Я'}
           loading={msgLoading}
         />
 

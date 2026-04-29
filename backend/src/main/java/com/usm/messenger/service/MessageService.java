@@ -10,12 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.usm.messenger.dto.request.SendMessageRequest;
 import com.usm.messenger.dto.response.MessageResponse;
+import com.usm.messenger.entity.Attachment;
 import com.usm.messenger.entity.Chat;
 import com.usm.messenger.entity.ChatMember;
 import com.usm.messenger.entity.Message;
 import com.usm.messenger.entity.User;
 import com.usm.messenger.exception.AccessDeniedException;
 import com.usm.messenger.exception.ChatNotFoundException;
+import com.usm.messenger.repository.AttachmentRepository;
 import com.usm.messenger.repository.ChatMemberRepository;
 import com.usm.messenger.repository.ChatRepository;
 import com.usm.messenger.repository.MessageRepository;
@@ -32,6 +34,8 @@ public class MessageService {
     private final ChatMemberRepository chatMemberRepository;
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
+    private final AttachmentRepository attachmentRepository;
+    private final FileService fileService;
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageCrypto messageCrypto;
 
@@ -51,14 +55,35 @@ public class MessageService {
         Chat chat = chatRepository.findById(chatId)
             .orElseThrow(() -> new ChatNotFoundException("Chat not found: " + chatId));
 
+        String text = request.getContent() != null ? request.getContent().trim() : "";
+        Attachment attachment = null;
+        if (request.getAttachmentId() != null) {
+            attachment = attachmentRepository.findById(request.getAttachmentId())
+                .orElseThrow(() -> new AccessDeniedException("Attachment not found: " + request.getAttachmentId()));
+            if (attachment.getUploadedBy() == null || !attachment.getUploadedBy().getId().equals(userId)) {
+                throw new AccessDeniedException("Cannot attach foreign file");
+            }
+        }
+        if (text.isEmpty() && attachment == null) {
+            throw new IllegalArgumentException("Message must have content or attachment");
+        }
+
         Message msg = Message.builder()
             .chat(chat)
             .sender(sender)
-            .content(messageCrypto.encrypt(request.getContent().trim()))
-            .type("TEXT")
+            .content(text.isEmpty() ? null : messageCrypto.encrypt(text))
+            .type(attachment != null ? "FILE" : "TEXT")
             .createdAt(LocalDateTime.now())
+            .attachment(attachment)
             .build();
         msg = messageRepository.save(msg);
+
+        // Привязываем attachment ↔ message обратной ссылкой (для каскадного удаления и поиска вложений по чату).
+        if (attachment != null) {
+            attachment.setMessage(msg);
+            attachmentRepository.save(attachment);
+        }
+
         MessageResponse dto = toResponse(msg);
         messagingTemplate.convertAndSend("/topic/chats/" + chatId + "/messages", dto);
         return dto;
@@ -87,8 +112,10 @@ public class MessageService {
             .senderId(s != null ? s.getId() : null)
             .senderFirstName(s != null ? s.getFirstName() : null)
             .senderLastName(s != null ? s.getLastName() : null)
-            .content(messageCrypto.decrypt(m.getContent()))
+            .senderAvatarFileId(s != null ? s.getAvatarFileId() : null)
+            .content(m.getContent() == null ? null : messageCrypto.decrypt(m.getContent()))
             .createdAt(m.getCreatedAt())
+            .attachment(m.getAttachment() != null ? fileService.toResponse(m.getAttachment()) : null)
             .build();
     }
 }

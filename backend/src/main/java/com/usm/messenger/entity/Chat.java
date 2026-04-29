@@ -32,6 +32,7 @@ public class Chat {
     @Column(name = "created_at") LocalDateTime createdAt;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "created_by") User createdBy;
     @Column(name = "avatar_url") String avatarUrl;
+    @Column(name = "avatar_file_id") String avatarFileId;
     String description;
 
     @OneToMany(mappedBy = "chat", fetch = FetchType.LAZY)

@@ -65,6 +65,7 @@ public class UserService {
         dto.setEmail(user.getEmail());
         dto.setRole(user.getRole());
         dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setAvatarFileId(user.getAvatarFileId());
         dto.setLastSeen(user.getLastSeen());
         return dto;
     }

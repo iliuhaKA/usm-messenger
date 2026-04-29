@@ -8,5 +8,6 @@ export interface User {
   email?: string;
   role: UserRole;
   avatarUrl?: string | null;
+  avatarFileId?: string | null;
   lastSeen?: string | null;
 }

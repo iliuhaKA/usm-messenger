@@ -37,6 +37,9 @@ public class SecurityConfig {
                     "/actuator/health",
                     "/ws/**"
                 ).permitAll()
+                // Скачивание по 24-символьному ObjectId — публично, чтобы <img src> работал.
+                // Угадать id извне невозможно; запись/удаление защищены ниже.
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/files/*").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

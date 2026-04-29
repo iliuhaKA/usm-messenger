@@ -1,4 +1,18 @@
-import type { Message } from '../types/message.types';
+import type { Attachment, Message } from '../types/message.types';
+
+function normalizeAttachment(raw: unknown): Attachment | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  if (o.id == null || o.fileId == null) return null;
+  return {
+    id: Number(o.id),
+    fileId: String(o.fileId),
+    fileName: String(o.fileName ?? ''),
+    mimeType: String(o.mimeType ?? 'application/octet-stream'),
+    sizeBytes: Number(o.sizeBytes ?? 0),
+    uploadedById: o.uploadedById != null ? Number(o.uploadedById) : null,
+  };
+}
 
 /** STOMP/MVC иногда отдают LocalDateTime массивом — приводим к Message. */
 export function normalizeStompMessage(raw: unknown): Message | null {
@@ -23,7 +37,9 @@ export function normalizeStompMessage(raw: unknown): Message | null {
     senderId: o.senderId != null ? Number(o.senderId) : null,
     senderFirstName: o.senderFirstName != null ? String(o.senderFirstName) : null,
     senderLastName: o.senderLastName != null ? String(o.senderLastName) : null,
-    content: String(o.content ?? ''),
+    senderAvatarFileId: o.senderAvatarFileId != null ? String(o.senderAvatarFileId) : null,
+    content: o.content != null ? String(o.content) : null,
     createdAt,
+    attachment: normalizeAttachment(o.attachment),
   };
 }

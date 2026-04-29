@@ -14,6 +14,7 @@ public class ChatListItemResponse {
     private String name;
     private ChatTypes type;
     private String avatarUrl;
+    private String avatarFileId;
     private String lastMessage;
     private LocalDateTime lastMessageTime;
     private int unreadCount;

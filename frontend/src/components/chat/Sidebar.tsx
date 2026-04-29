@@ -8,6 +8,7 @@ import { cn } from '../../utils/cn';
 import { useAuthStore } from '../../store/authStore';
 import type { ChatListItem } from '../../types/chat.types';
 import { formatMessageTime } from '../../lib/format';
+import { Avatar } from '../Avatar';
 import { CreateChatModal } from './CreateChatModal';
 
 function ChatRow({ chat }: { chat: ChatListItem }) {
@@ -24,9 +25,7 @@ function ChatRow({ chat }: { chat: ChatListItem }) {
         active ? 'bg-[var(--color-chat-active)]' : 'hover:bg-black/5'
       )}
     >
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-lg font-semibold text-primary">
-        {chat.name.slice(0, 1).toUpperCase()}
-      </div>
+      <Avatar name={chat.name} fileId={chat.avatarFileId} url={chat.avatarUrl} size="md" />
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <span className="truncate font-medium text-text-main">{chat.name}</span>

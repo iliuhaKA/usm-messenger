@@ -5,6 +5,7 @@ export interface ChatListItem {
   name: string;
   type: ChatType;
   avatarUrl?: string | null;
+  avatarFileId?: string | null;
   lastMessage?: string | null;
   lastMessageTime?: string | null;
   unreadCount: number;
@@ -21,6 +22,7 @@ export interface ChatMemberPreview {
   email?: string;
   role: string;
   avatarUrl?: string | null;
+  avatarFileId?: string | null;
   lastSeen?: string | null;
 }
 
@@ -30,6 +32,7 @@ export interface ChatDetail {
   type: ChatType;
   description?: string | null;
   avatarUrl?: string | null;
+  avatarFileId?: string | null;
   createdAt: string;
   memberCount: number;
   unreadCount: number;
