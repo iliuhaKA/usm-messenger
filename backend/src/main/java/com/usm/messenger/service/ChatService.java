@@ -34,6 +34,7 @@ public class ChatService {
     private final UserService userService;
     private final MessageRepository messageRepository;
     private final MessageCrypto messageCrypto;
+    private final UnreadCacheService unreadCache;
 
     @Transactional(readOnly = true)
     public List<ChatListItemResponse> getChatsByUserId(Long userId) {
@@ -56,8 +57,7 @@ public class ChatService {
         dto.setType(chat.getType());
         dto.setAvatarUrl(chat.getAvatarUrl());
         dto.setAvatarFileId(chat.getAvatarFileId());
-        LocalDateTime since = cm.getLastReadAt() != null ? cm.getLastReadAt() : LocalDateTime.MIN;
-        dto.setUnreadCount((int) messageRepository.countIncomingUnreadAfter(chat.getId(), cm.getUser().getId(), since));
+        dto.setUnreadCount((int) unreadCache.get(cm.getUser().getId(), chat.getId()));
         dto.setPinned(Boolean.TRUE.equals(cm.getIsPinned()));
         dto.setMuted(Boolean.TRUE.equals(cm.getIsMuted()));
         dto.setMemberCount(chat.getMembers().size());
@@ -89,8 +89,7 @@ public class ChatService {
         dto.setAvatarUrl(chat.getAvatarUrl());
         dto.setAvatarFileId(chat.getAvatarFileId());
         dto.setCreatedAt(chat.getCreatedAt());
-        LocalDateTime since = membership.getLastReadAt() != null ? membership.getLastReadAt() : LocalDateTime.MIN;
-        dto.setUnreadCount((int) messageRepository.countIncomingUnreadAfter(chatId, userId, since));
+        dto.setUnreadCount((int) unreadCache.get(userId, chatId));
         dto.setPinned(Boolean.TRUE.equals(membership.getIsPinned()));
         dto.setMuted(Boolean.TRUE.equals(membership.getIsMuted()));
         dto.setMemberCount(chat.getMembers().size());

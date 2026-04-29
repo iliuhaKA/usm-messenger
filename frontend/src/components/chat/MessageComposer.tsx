@@ -5,6 +5,7 @@ import { uploadAttachment } from '../../api/files.api';
 import { useSendMessage } from '../../hooks/useMessages';
 import { useAuthStore } from '../../store/authStore';
 import type { Attachment } from '../../types/message.types';
+import { useTypingPublisher } from './ChatStompBridge';
 
 export function MessageComposer({ chatId }: { chatId: number }) {
   const user = useAuthStore((s) => s.user);
@@ -13,6 +14,7 @@ export function MessageComposer({ chatId }: { chatId: number }) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const send = useSendMessage(user?.id ?? null);
+  const publishTyping = useTypingPublisher();
 
   const onPickFile = () => fileInputRef.current?.click();
 
@@ -77,7 +79,12 @@ export function MessageComposer({ chatId }: { chatId: number }) {
             className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none placeholder:text-text-muted"
             placeholder="Введите сообщение…"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              if (e.target.value.trim()) publishTyping(chatId, true);
+              else publishTyping(chatId, false);
+            }}
+            onBlur={() => publishTyping(chatId, false)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();

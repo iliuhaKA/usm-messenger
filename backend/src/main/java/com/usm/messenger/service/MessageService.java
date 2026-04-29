@@ -36,6 +36,7 @@ public class MessageService {
     private final UserRepository userRepository;
     private final AttachmentRepository attachmentRepository;
     private final FileService fileService;
+    private final UnreadCacheService unreadCache;
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageCrypto messageCrypto;
 
@@ -85,6 +86,13 @@ public class MessageService {
         }
 
         MessageResponse dto = toResponse(msg);
+        // Инкремент unread для всех получателей кроме отправителя — Redis
+        chatMemberRepository.findByChatId(chatId).forEach(member -> {
+            Long memberId = member.getUser().getId();
+            if (!memberId.equals(userId)) {
+                unreadCache.increment(memberId, chatId);
+            }
+        });
         messagingTemplate.convertAndSend("/topic/chats/" + chatId + "/messages", dto);
         return dto;
     }
@@ -96,6 +104,7 @@ public class MessageService {
             .orElseThrow(() -> new AccessDeniedException("Access denied to chat: " + chatId));
         cm.setLastReadAt(LocalDateTime.now());
         chatMemberRepository.save(cm);
+        unreadCache.clear(userId, chatId);
     }
 
     private void ensureMember(Long chatId, Long userId) {

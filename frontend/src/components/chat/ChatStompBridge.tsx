@@ -9,6 +9,7 @@ import { normalizeStompMessage } from '../../lib/normalizeStompMessage';
 import { playNotificationSound, primeNotificationAudio } from '../../lib/playNotificationSound';
 import { getWsBaseUrl } from '../../lib/wsBaseUrl';
 import { useAuthStore } from '../../store/authStore';
+import { usePresenceStore } from '../../store/presenceStore';
 import type { Message } from '../../types/message.types';
 
 function appendMessage(
@@ -31,6 +32,7 @@ export function ChatStompBridge() {
   const qc = useQueryClient();
 
   const uidRef = useRef(uid);
+  const clientRef = useRef<Client | null>(null);
 
   useEffect(() => {
     uidRef.current = uid;
@@ -92,6 +94,24 @@ export function ChatStompBridge() {
     [qc]
   );
 
+  const onPresenceFrame = useCallback((frame: IMessage) => {
+    try {
+      const data = JSON.parse(frame.body) as { userId: number; status: string };
+      usePresenceStore.getState().setStatus(Number(data.userId), data.status);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const onTypingFrame = useCallback((frame: IMessage) => {
+    try {
+      const data = JSON.parse(frame.body) as { chatId: number; userId: number; typing: boolean };
+      usePresenceStore.getState().setTyping(Number(data.chatId), Number(data.userId), data.typing);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const token = useAuthStore((s) => s.token);
 
   useEffect(() => {
@@ -100,10 +120,6 @@ export function ChatStompBridge() {
     const base = getWsBaseUrl();
     const sockUrl = `${base.replace(/\/$/, '')}/ws`;
 
-    if (import.meta.env.DEV) {
-      console.info('[stomp] connecting to', sockUrl);
-    }
-
     const client = new Client({
       webSocketFactory: () => new SockJS(sockUrl) as unknown as WebSocket,
       connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
@@ -111,16 +127,15 @@ export function ChatStompBridge() {
       heartbeatIncoming: 15000,
       heartbeatOutgoing: 15000,
       onConnect: () => {
-        if (import.meta.env.DEV) {
-          console.info('[stomp] connected, subscribing to chats:', chatIdsKey);
-        }
         chatIdsKey
           .split(',')
           .filter(Boolean)
           .map(Number)
           .forEach((id) => {
             client.subscribe(`/topic/chats/${id}/messages`, onStompMessage);
+            client.subscribe(`/topic/chats/${id}/typing`, onTypingFrame);
           });
+        client.subscribe('/topic/presence', onPresenceFrame);
       },
       onStompError: (frame) => {
         console.error('[stomp] broker error', frame.headers?.message, frame.body);
@@ -131,11 +146,51 @@ export function ChatStompBridge() {
     });
 
     client.activate();
+    clientRef.current = client;
+    (window as unknown as { __stompClient?: Client }).__stompClient = client;
+
+    // Heartbeat: продлеваем presence в Redis раз в 30 секунд.
+    const heartbeat = window.setInterval(() => {
+      if (client.connected) {
+        client.publish({ destination: '/app/heartbeat', body: '' });
+      }
+    }, 30_000);
 
     return () => {
+      window.clearInterval(heartbeat);
       void client.deactivate();
+      clientRef.current = null;
+      (window as unknown as { __stompClient?: Client }).__stompClient = undefined;
     };
-  }, [uid, chatIdsKey, onStompMessage, token]);
+  }, [uid, chatIdsKey, onStompMessage, onPresenceFrame, onTypingFrame, token]);
 
   return null;
+}
+
+/**
+ * Хук для отправки typing-события из MessageComposer.
+ * Использует тот же STOMP-клиент через глобальную ref-переменную.
+ */
+export function useTypingPublisher() {
+  const lastSent = useRef<{ chatId: number | null; at: number; typing: boolean }>({
+    chatId: null,
+    at: 0,
+    typing: false,
+  });
+
+  return (chatId: number, typing: boolean) => {
+    const now = Date.now();
+    const last = lastSent.current;
+    // дросселируем: typing раз в 3 секунды, stop-typing — сразу
+    if (typing && last.typing && last.chatId === chatId && now - last.at < 3000) return;
+    lastSent.current = { chatId, at: now, typing };
+
+    const client = (window as unknown as { __stompClient?: Client }).__stompClient;
+    if (client && client.connected) {
+      client.publish({
+        destination: `/app/chats/${chatId}/typing`,
+        body: JSON.stringify({ typing }),
+      });
+    }
+  };
 }
