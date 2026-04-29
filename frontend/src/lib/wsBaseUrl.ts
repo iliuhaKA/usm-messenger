@@ -25,7 +25,7 @@ export function getWsBaseUrl(): string {
     }
   }
 
-  const api = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+  const api = import.meta.env.VITE_API_URL || 'https://localhost:8443/api';
   if (api.startsWith('http://') || api.startsWith('https://')) {
     return new URL(api).origin;
   }
@@ -34,5 +34,5 @@ export function getWsBaseUrl(): string {
     return window.location.origin;
   }
 
-  return 'http://localhost:8080';
+  return 'https://localhost:8443';
 }

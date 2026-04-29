@@ -9,14 +9,28 @@ RUN mvn dependency:go-offline -B
 
 COPY src ./src
 
+# Самоподписной keystore для HTTPS/WSS. Перегенерируется при каждой сборке —
+# это нормально для self-signed dev-сертификата. Файл попадает в classpath
+# приложения и подхватывается Spring как classpath:keystore.p12.
+# rm -f нужен на случай, если в build context попал ранее сгенерённый keystore.
+RUN rm -f src/main/resources/keystore.p12 && keytool -genkeypair \
+      -alias usm \
+      -keyalg RSA \
+      -keysize 2048 \
+      -validity 365 \
+      -storetype PKCS12 \
+      -keystore src/main/resources/keystore.p12 \
+      -storepass changeit \
+      -keypass changeit \
+      -dname "CN=localhost, OU=USM, O=USM, L=Chisinau, S=MD, C=MD" \
+      -ext "san=dns:localhost,ip:127.0.0.1"
+
 RUN mvn package -B -DskipTests
 
 # Стадия 2: только JRE и JAR
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-# Копируем JAR из стадии build
 COPY --from=build /app/target/messenger-0.0.1-SNAPSHOT.jar app.jar
-# Порт, на котором слушает приложение (как в application.yml: 8080)
-EXPOSE 8080
-# Запуск приложения
+# HTTPS-порт (см. application.yml)
+EXPOSE 8443
 ENTRYPOINT ["java", "-jar", "app.jar"]

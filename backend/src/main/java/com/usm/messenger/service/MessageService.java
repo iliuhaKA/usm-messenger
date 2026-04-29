@@ -20,6 +20,7 @@ import com.usm.messenger.repository.ChatMemberRepository;
 import com.usm.messenger.repository.ChatRepository;
 import com.usm.messenger.repository.MessageRepository;
 import com.usm.messenger.repository.UserRepository;
+import com.usm.messenger.security.MessageCrypto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +33,7 @@ public class MessageService {
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final MessageCrypto messageCrypto;
 
     @Transactional(readOnly = true)
     public List<MessageResponse> getMessages(Long chatId, Long userId) {
@@ -52,7 +54,7 @@ public class MessageService {
         Message msg = Message.builder()
             .chat(chat)
             .sender(sender)
-            .content(request.getContent().trim())
+            .content(messageCrypto.encrypt(request.getContent().trim()))
             .type("TEXT")
             .createdAt(LocalDateTime.now())
             .build();
@@ -85,7 +87,7 @@ public class MessageService {
             .senderId(s != null ? s.getId() : null)
             .senderFirstName(s != null ? s.getFirstName() : null)
             .senderLastName(s != null ? s.getLastName() : null)
-            .content(m.getContent())
+            .content(messageCrypto.decrypt(m.getContent()))
             .createdAt(m.getCreatedAt())
             .build();
     }

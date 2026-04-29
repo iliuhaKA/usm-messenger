@@ -1,0 +1,14 @@
+target/
+*.log
+.idea
+.vscode
+*.iml
+
+# Локально сгенерённый keystore — в образе создаётся свой
+src/main/resources/keystore.p12
+*.p12
+*.jks
+
+.env
+.env.local
+application-local.yml

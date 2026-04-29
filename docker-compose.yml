@@ -24,11 +24,15 @@ services:
     container_name: usm-backend
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8443:8443"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/usm_messenger
       SPRING_DATASOURCE_USERNAME: usm
       SPRING_DATASOURCE_PASSWORD: usm123
+      # AES-256 ключ для шифрования сообщений at-rest (base64).
+      # В реальном проде — генерировать свой и хранить в secrets.
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY:-bzAwaeg8IBTv53epzFTgtHf9w68iuLBPYJ/NkttkU1o=}
+      SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD:-changeit}
     depends_on:
       postgres:
         condition: service_healthy
@@ -38,13 +42,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: http://localhost:8080/api
+        VITE_API_URL: https://localhost:8443/api
+        VITE_BACKEND_ORIGIN: https://localhost:8443
     container_name: usm-frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "3000:443"
     depends_on:
-      - backend     
+      - backend
 
 volumes:
   postgres_data:

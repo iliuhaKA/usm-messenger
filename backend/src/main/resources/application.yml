@@ -28,10 +28,22 @@ spring:
       password: admin  # Временно для тестирования
 
 server:
-  port: 8080
+  port: 8443
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: ${SSL_KEYSTORE_PASSWORD:changeit}
+    key-store-type: PKCS12
+    key-alias: usm
   error:
     include-message: always
     include-binding-errors: always
+
+app:
+  security:
+    # Ключ AES-256 в base64. В проде задавать через переменную окружения MESSAGE_ENCRYPTION_KEY,
+    # значение ниже — только для локальной разработки.
+    message-encryption-key: ${MESSAGE_ENCRYPTION_KEY:bzAwaeg8IBTv53epzFTgtHf9w68iuLBPYJ/NkttkU1o=}
 
 logging:
   level:

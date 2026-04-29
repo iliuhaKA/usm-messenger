@@ -21,17 +21,19 @@ import com.usm.messenger.repository.ChatMemberRepository;
 import com.usm.messenger.repository.ChatRepository;
 import com.usm.messenger.repository.MessageRepository;
 import com.usm.messenger.repository.UserRepository;
+import com.usm.messenger.security.MessageCrypto;
 
 import lombok.RequiredArgsConstructor;
 
 @Service @RequiredArgsConstructor
 public class ChatService {
-    
+
     private final ChatRepository chatRepository;
     private final ChatMemberRepository chatMemberRepository;
     private final UserRepository userRepository;
     private final UserService userService;
     private final MessageRepository messageRepository;
+    private final MessageCrypto messageCrypto;
 
     @Transactional(readOnly = true)
     public List<ChatListItemResponse> getChatsByUserId(Long userId) {
@@ -60,7 +62,7 @@ public class ChatService {
         dto.setMemberCount(chat.getMembers().size());
 
         messageRepository.findFirstByChat_IdOrderByCreatedAtDesc(chat.getId()).ifPresentOrElse(last -> {
-            dto.setLastMessage(last.getContent());
+            dto.setLastMessage(messageCrypto.decrypt(last.getContent()));
             dto.setLastMessageTime(last.getCreatedAt());
         }, () -> {
             dto.setLastMessage(null);

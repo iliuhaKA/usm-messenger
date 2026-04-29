@@ -19,7 +19,10 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://localhost:3000"));
+        config.setAllowedOriginPatterns(List.of(
+            "http://localhost:5173", "https://localhost:5173",
+            "http://localhost:3000", "https://localhost:3000"
+        ));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setMaxAge(3600L);
