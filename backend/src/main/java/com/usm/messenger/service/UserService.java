@@ -7,7 +7,11 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import com.usm.messenger.dto.request.ChangePasswordRequest;
 import com.usm.messenger.dto.request.LoginRequest;
+import com.usm.messenger.dto.request.UpdateProfileRequest;
 import com.usm.messenger.dto.response.UserResponse;
 import com.usm.messenger.entity.User;
 import com.usm.messenger.exception.BadCredentialsException;
@@ -54,6 +58,37 @@ public class UserService {
 
     public UserResponse authenticate(LoginRequest request) {
         return toResponse(authenticateAndGetUser(request));
+    }
+
+    @Transactional
+    public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+        if (request.getFirstName() != null) user.setFirstName(request.getFirstName().trim());
+        if (request.getLastName() != null) user.setLastName(request.getLastName().trim());
+        if (request.getEmail() != null) user.setEmail(request.getEmail().trim());
+        return toResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+        if (user.getPasswordHash() == null
+            || !passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new BadCredentialsException("Текущий пароль введён неверно");
+        }
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setIsPasswordSet(true);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public UserResponse setAvatar(Long userId, String avatarFileId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+        user.setAvatarFileId(avatarFileId);
+        return toResponse(userRepository.save(user));
     }
 
     private UserResponse toResponse(User user) {

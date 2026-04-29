@@ -17,6 +17,12 @@ export function primeNotificationAudio(): void {
 export function playNotificationSound(): void {
   try {
     if (typeof window === 'undefined') return;
+    // Уважаем пользовательскую настройку звука из SettingsPage.
+    try {
+      if (localStorage.getItem('usm-notification-sound') === '0') return;
+    } catch {
+      /* ignore */
+    }
     const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     if (!ctx) ctx = new Ctx();

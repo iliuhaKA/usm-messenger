@@ -1,6 +1,6 @@
-import { LogOut, MessageCircle, Pin, Plus, Search } from 'lucide-react';
+import { LogOut, MessageCircle, Pin, Plus, Search, Settings } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 
 import { useLogout } from '../../hooks/useAuth';
 import { useChats } from '../../hooks/useChats';
@@ -90,18 +90,14 @@ export function Sidebar() {
             </div>
             <span className="truncate text-lg font-semibold text-primary">USMessenger</span>
           </div>
-          <button
-            type="button"
+          <Link
+            to="/settings"
             className="rounded-lg p-2 text-text-muted hover:bg-black/5"
-            title="Выйти"
-            onClick={() => {
-              logoutMutation.mutate(undefined, {
-                onSettled: () => navigate('/login', { replace: true }),
-              });
-            }}
+            title="Настройки"
+            aria-label="Настройки"
           >
-            <LogOut className="h-5 w-5" />
-          </button>
+            <Settings className="h-5 w-5" />
+          </Link>
         </div>
 
         <div className="flex gap-2 px-3 py-3">
@@ -109,7 +105,7 @@ export function Sidebar() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             <input
               type="search"
-              placeholder="Search messages, people."
+              placeholder="Поиск чатов…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="w-full rounded-full border border-black/10 bg-white py-2 pl-9 pr-3 text-sm outline-none ring-primary focus:ring-2"
@@ -119,7 +115,8 @@ export function Sidebar() {
             type="button"
             onClick={() => setModalOpen(true)}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-white shadow hover:opacity-90"
-            aria-label="New chat"
+            aria-label="Новый чат"
+            title="Новый чат"
           >
             <Plus className="h-5 w-5" />
           </button>
@@ -127,17 +124,17 @@ export function Sidebar() {
 
         <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
           {isLoading && (
-            <p className="px-3 py-6 text-center text-sm text-text-muted">Se încarcă…</p>
+            <p className="px-3 py-6 text-center text-sm text-text-muted">Загрузка…</p>
           )}
           {isError && (
-            <p className="px-3 py-6 text-center text-sm text-accent-red">Eroare la încărcarea chat-urilor</p>
+            <p className="px-3 py-6 text-center text-sm text-accent-red">Ошибка загрузки чатов</p>
           )}
           {!isLoading && !isError && chats?.length === 0 && (
-            <p className="px-3 py-6 text-center text-sm text-text-muted">Nu aveți încă chat-uri</p>
+            <p className="px-3 py-6 text-center text-sm text-text-muted">У вас пока нет чатов</p>
           )}
 
           {pinned.length > 0 && (
-            <Section title="Pinned chats" icon={Pin}>
+            <Section title="Закреплённые" icon={Pin}>
               {pinned.map((c) => (
                 <ChatRow key={c.id} chat={c} />
               ))}
@@ -145,13 +142,47 @@ export function Sidebar() {
           )}
 
           {rest.length > 0 && (
-            <Section title="All messages" icon={MessageCircle}>
+            <Section title="Все сообщения" icon={MessageCircle}>
               {rest.map((c) => (
                 <ChatRow key={c.id} chat={c} />
               ))}
             </Section>
           )}
         </div>
+
+        {user && (
+          <div className="flex items-center gap-3 border-t border-black/5 bg-white/40 px-3 py-3">
+            <Link
+              to="/profile"
+              className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1 hover:bg-black/5"
+            >
+              <Avatar
+                name={`${user.firstName} ${user.lastName}`}
+                fileId={user.avatarFileId}
+                url={user.avatarUrl}
+                size="sm"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium text-text-main">
+                  {user.firstName} {user.lastName}
+                </div>
+                <div className="truncate text-xs text-text-muted">{user.role}</div>
+              </div>
+            </Link>
+            <button
+              type="button"
+              className="rounded-lg p-2 text-text-muted hover:bg-black/5"
+              title="Выйти"
+              onClick={() => {
+                logoutMutation.mutate(undefined, {
+                  onSettled: () => navigate('/login', { replace: true }),
+                });
+              }}
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
+        )}
       </aside>
 
       <CreateChatModal open={modalOpen} onClose={() => setModalOpen(false)} />
