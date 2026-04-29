@@ -73,7 +73,7 @@ export function ChatStompBridge() {
         if (isActive) {
           appendMessage(qc, msg.chatId, myUid, msg);
           if (!isOwn) {
-            await markChatRead(msg.chatId, myUid);
+            await markChatRead(msg.chatId);
           }
         } else {
           qc.invalidateQueries({ queryKey: ['messages', msg.chatId, myUid] });
@@ -92,6 +92,8 @@ export function ChatStompBridge() {
     [qc]
   );
 
+  const token = useAuthStore((s) => s.token);
+
   useEffect(() => {
     if (!uid || !chatIdsKey) return;
 
@@ -104,6 +106,7 @@ export function ChatStompBridge() {
 
     const client = new Client({
       webSocketFactory: () => new SockJS(sockUrl) as unknown as WebSocket,
+      connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
       reconnectDelay: 4000,
       heartbeatIncoming: 15000,
       heartbeatOutgoing: 15000,
@@ -132,7 +135,7 @@ export function ChatStompBridge() {
     return () => {
       void client.deactivate();
     };
-  }, [uid, chatIdsKey, onStompMessage]);
+  }, [uid, chatIdsKey, onStompMessage, token]);
 
   return null;
 }

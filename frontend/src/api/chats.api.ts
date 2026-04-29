@@ -33,29 +33,29 @@ function mapChatDetail(raw: Record<string, unknown>): ChatDetail {
   };
 }
 
-export async function fetchChats(userId: number): Promise<ChatListItem[]> {
-  const { data } = await axiosInstance.get<Record<string, unknown>[]>('/chats', { params: { userId } });
+export async function fetchChats(): Promise<ChatListItem[]> {
+  const { data } = await axiosInstance.get<Record<string, unknown>[]>('/chats');
   return data.map(mapListItem);
 }
 
-export async function fetchChat(chatId: number, userId: number): Promise<ChatDetail> {
-  const { data } = await axiosInstance.get<Record<string, unknown>>(`/chats/${chatId}`, { params: { userId } });
+export async function fetchChat(chatId: number): Promise<ChatDetail> {
+  const { data } = await axiosInstance.get<Record<string, unknown>>(`/chats/${chatId}`);
   return mapChatDetail(data);
 }
 
-export async function createChat(userId: number, body: CreateChatPayload): Promise<ChatDetail> {
-  const { data } = await axiosInstance.post<Record<string, unknown>>('/chats', body, { params: { userId } });
+export async function createChat(body: CreateChatPayload): Promise<ChatDetail> {
+  const { data } = await axiosInstance.post<Record<string, unknown>>('/chats', body);
   return mapChatDetail(data);
 }
 
-export async function pinChat(chatId: number, userId: number, pinned: boolean): Promise<void> {
-  await axiosInstance.patch(`/chats/${chatId}/pin`, { pinned }, { params: { userId } });
+export async function pinChat(chatId: number, pinned: boolean): Promise<void> {
+  await axiosInstance.patch(`/chats/${chatId}/pin`, { pinned });
 }
 
-export async function muteChat(chatId: number, userId: number, muted: boolean): Promise<void> {
-  await axiosInstance.patch(`/chats/${chatId}/mute`, { muted }, { params: { userId } });
+export async function muteChat(chatId: number, muted: boolean): Promise<void> {
+  await axiosInstance.patch(`/chats/${chatId}/mute`, { muted });
 }
 
-export async function markChatRead(chatId: number, userId: number): Promise<void> {
-  await axiosInstance.post(`/chats/${chatId}/read`, {}, { params: { userId } });
+export async function markChatRead(chatId: number): Promise<void> {
+  await axiosInstance.post(`/chats/${chatId}/read`, {});
 }

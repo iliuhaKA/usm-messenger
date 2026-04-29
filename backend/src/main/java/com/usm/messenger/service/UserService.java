@@ -38,7 +38,7 @@ public class UserService {
             .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    public UserResponse authenticate(LoginRequest request) {
+    public User authenticateAndGetUser(LoginRequest request) {
         Optional<User> userOpt = request.getLogin().contains("@")
             ? userRepository.findByEmailIgnoreCase(request.getLogin().trim())
             : userRepository.findByIdnp(request.getLogin().trim());
@@ -49,7 +49,11 @@ public class UserService {
             throw new BadCredentialsException("Неверный логин или пароль");
         }
 
-        return toResponse(user);
+        return user;
+    }
+
+    public UserResponse authenticate(LoginRequest request) {
+        return toResponse(authenticateAndGetUser(request));
     }
 
     private UserResponse toResponse(User user) {

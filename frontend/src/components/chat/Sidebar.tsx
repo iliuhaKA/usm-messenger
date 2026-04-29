@@ -2,6 +2,7 @@ import { LogOut, MessageCircle, Pin, Plus, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 
+import { useLogout } from '../../hooks/useAuth';
 import { useChats } from '../../hooks/useChats';
 import { cn } from '../../utils/cn';
 import { useAuthStore } from '../../store/authStore';
@@ -64,7 +65,7 @@ function Section({
 
 export function Sidebar() {
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const logoutMutation = useLogout();
   const navigate = useNavigate();
   const [q, setQ] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -93,15 +94,11 @@ export function Sidebar() {
           <button
             type="button"
             className="rounded-lg p-2 text-text-muted hover:bg-black/5"
-            title="Ieșire"
+            title="Выйти"
             onClick={() => {
-              try {
-                localStorage.removeItem('usm-auth');
-              } catch {
-                /* ignore */
-              }
-              logout();
-              navigate('/login', { replace: true });
+              logoutMutation.mutate(undefined, {
+                onSettled: () => navigate('/login', { replace: true }),
+              });
             }}
           >
             <LogOut className="h-5 w-5" />

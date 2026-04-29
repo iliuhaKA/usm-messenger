@@ -7,7 +7,17 @@ export interface LoginPayload {
   password: string;
 }
 
-export async function loginRequest(payload: LoginPayload): Promise<User> {
-  const { data } = await axiosInstance.post<User>('/auth/login', payload);
+export interface LoginResponse {
+  token: string;
+  expiresAtEpochMs: number;
+  user: User;
+}
+
+export async function loginRequest(payload: LoginPayload): Promise<LoginResponse> {
+  const { data } = await axiosInstance.post<LoginResponse>('/auth/login', payload);
   return data;
+}
+
+export async function logoutRequest(): Promise<void> {
+  await axiosInstance.post('/auth/logout', {});
 }
