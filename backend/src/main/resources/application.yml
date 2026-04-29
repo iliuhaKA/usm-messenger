@@ -22,6 +22,19 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
 
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/usm_messenger}
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: 2s
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
   security:
     user:
       name: admin
@@ -44,6 +57,11 @@ app:
     # Ключ AES-256 в base64. В проде задавать через переменную окружения MESSAGE_ENCRYPTION_KEY,
     # значение ниже — только для локальной разработки.
     message-encryption-key: ${MESSAGE_ENCRYPTION_KEY:bzAwaeg8IBTv53epzFTgtHf9w68iuLBPYJ/NkttkU1o=}
+  jwt:
+    # Секрет для подписи JWT (HMAC-SHA256). >= 32 байта в base64.
+    # Сгенерировать новый: openssl rand -base64 32
+    secret: ${APP_JWT_SECRET:ZGV2LWp3dC1zZWNyZXQtcmVwbGFjZS1pbi1wcm9kLTI1Ni1iaXRzLW1pbi0xMjM=}
+    expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
 
 logging:
   level:

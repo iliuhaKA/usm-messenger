@@ -17,6 +17,35 @@ services:
       timeout: 5s
       retries: 5
 
+  mongodb:
+    image: mongo:7
+    container_name: usm-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: usm-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
@@ -29,12 +58,22 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/usm_messenger
       SPRING_DATASOURCE_USERNAME: usm
       SPRING_DATASOURCE_PASSWORD: usm123
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/usm_messenger
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
       # AES-256 ключ для шифрования сообщений at-rest (base64).
       # В реальном проде — генерировать свой и хранить в secrets.
       MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY:-bzAwaeg8IBTv53epzFTgtHf9w68iuLBPYJ/NkttkU1o=}
       SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD:-changeit}
+      # JWT secret (>= 32 байта в base64). В проде — через secrets.
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-ZGV2LWp3dC1zZWNyZXQtcmVwbGFjZS1pbi1wcm9kLTI1Ni1iaXRzLW1pbi0xMjM=}
+      APP_JWT_EXPIRATION_MS: ${APP_JWT_EXPIRATION_MS:-86400000}
     depends_on:
       postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   frontend:
@@ -53,4 +92,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  mongo_data:
+    driver: local
+  redis_data:
     driver: local
