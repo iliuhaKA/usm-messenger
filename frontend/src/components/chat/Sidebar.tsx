@@ -84,7 +84,7 @@ export function Sidebar() {
 
   return (
     <>
-      <aside className="flex w-[min(100%,380px)] shrink-0 flex-col border-r border-black/5 bg-[var(--color-sidebar-bg)]">
+      <aside className="flex w-[280px] shrink-0 flex-col border-r border-black/5 bg-[var(--color-sidebar-bg)] lg:w-[340px] xl:w-[380px]">
         <div className="flex items-center justify-between gap-2 border-b border-black/5 px-4 py-4">
           <div className="flex min-w-0 items-center gap-2">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-lg font-bold text-white">

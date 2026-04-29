@@ -64,11 +64,12 @@ export function MessageComposer({ chatId }: { chatId: number }) {
             </button>
           </div>
         )}
-        <div className="flex items-end gap-2 rounded-2xl border border-black/10 bg-[var(--color-chat-bg)] px-2 py-2">
+        <div className="flex items-end gap-1 rounded-2xl border border-black/10 bg-[var(--color-chat-bg)] px-2 py-2 sm:gap-2">
+          {/* Эмодзи и голос — только на широких экранах, чтобы не воровать место у textarea. */}
           <button
             type="button"
             disabled
-            className="rounded-lg p-2 text-text-muted opacity-50"
+            className="hidden rounded-lg p-2 text-text-muted opacity-50 lg:inline-flex"
             title="В разработке"
             aria-label="Эмодзи"
           >
@@ -76,8 +77,8 @@ export function MessageComposer({ chatId }: { chatId: number }) {
           </button>
           <textarea
             rows={1}
-            className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none placeholder:text-text-muted"
-            placeholder="Введите сообщение…"
+            className="max-h-32 min-h-[44px] min-w-0 flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none placeholder:text-text-muted"
+            placeholder="Сообщение…"
             value={text}
             onChange={(e) => {
               setText(e.target.value);
@@ -95,7 +96,7 @@ export function MessageComposer({ chatId }: { chatId: number }) {
           <button
             type="button"
             disabled
-            className="rounded-lg p-2 text-text-muted opacity-50"
+            className="hidden rounded-lg p-2 text-text-muted opacity-50 lg:inline-flex"
             title="В разработке"
             aria-label="Голосовое"
           >
@@ -120,10 +121,13 @@ export function MessageComposer({ chatId }: { chatId: number }) {
           <button
             type="submit"
             disabled={(!text.trim() && !pending) || send.isPending || uploading}
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white whitespace-nowrap hover:opacity-90 disabled:opacity-50 sm:px-4"
+            aria-label="Отправить"
+            title="Отправить"
           >
             <SendHorizontal className="h-4 w-4" />
-            {uploading ? 'Загрузка…' : 'Отправить'}
+            {/* Подпись скрыта на узком экране, чтобы не ломать вёрстку при двух окнах рядом. */}
+            <span className="hidden md:inline">{uploading ? 'Загрузка…' : 'Отправить'}</span>
           </button>
         </div>
       </div>
