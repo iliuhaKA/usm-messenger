@@ -58,7 +58,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/usm_messenger
       SPRING_DATASOURCE_USERNAME: usm
       SPRING_DATASOURCE_PASSWORD: usm123
-      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/usm_messenger
+      SPRING_DATA_MONGODB_HOST: mongodb
+      SPRING_DATA_MONGODB_PORT: "27017"
+      SPRING_DATA_MONGODB_DATABASE: usm_messenger
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: "6379"
       # AES-256 ключ для шифрования сообщений at-rest (base64).
