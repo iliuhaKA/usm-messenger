@@ -195,11 +195,11 @@ export function ChatInfoDrawer({
   return (
     <>
       <div
-        className="absolute inset-0 z-30 bg-black/30"
+        className="absolute inset-0 z-30 bg-black/30 animate-fade-in"
         onClick={onClose}
         aria-label="Закрыть"
       />
-      <aside className="absolute right-0 top-0 z-40 flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-black/5 bg-white shadow-xl">
+      <aside className="absolute right-0 top-0 z-40 flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-black/5 bg-white shadow-xl animate-slide-in-right">
         <header className="flex shrink-0 items-center justify-between border-b border-black/5 px-4 py-3">
           <h2 className="font-semibold text-text-main">Информация о чате</h2>
           <button

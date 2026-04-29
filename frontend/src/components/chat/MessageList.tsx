@@ -6,6 +6,8 @@ import { cn } from '../../utils/cn';
 import type { Attachment, Message } from '../../types/message.types';
 import { formatMessageTime } from '../../lib/format';
 import { Avatar } from '../Avatar';
+import { EmptyMessages } from '../empty/EmptyStates';
+import { MessageSkeleton } from '../ui/Skeleton';
 
 function isImage(mime: string): boolean {
   return mime.startsWith('image/');
@@ -77,8 +79,18 @@ export function MessageList({
 
   if (loading && messages.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-text-muted">Загрузка сообщений…</div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <div className="mx-auto flex max-w-3xl flex-col gap-4">
+          <MessageSkeleton />
+          <MessageSkeleton mine />
+          <MessageSkeleton />
+        </div>
+      </div>
     );
+  }
+
+  if (!loading && messages.length === 0) {
+    return <EmptyMessages />;
   }
 
   return (

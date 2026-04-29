@@ -9,6 +9,8 @@ import { useAuthStore } from '../../store/authStore';
 import type { ChatListItem } from '../../types/chat.types';
 import { formatMessageTime } from '../../lib/format';
 import { Avatar } from '../Avatar';
+import { EmptyChats } from '../empty/EmptyStates';
+import { ChatRowSkeleton } from '../ui/Skeleton';
 import { CreateChatModal } from './CreateChatModal';
 
 function ChatRow({ chat }: { chat: ChatListItem }) {
@@ -124,13 +126,17 @@ export function Sidebar() {
 
         <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
           {isLoading && (
-            <p className="px-3 py-6 text-center text-sm text-text-muted">Загрузка…</p>
+            <div className="flex flex-col gap-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <ChatRowSkeleton key={i} />
+              ))}
+            </div>
           )}
           {isError && (
-            <p className="px-3 py-6 text-center text-sm text-accent-red">Ошибка загрузки чатов</p>
+            <p className="px-3 py-6 text-center text-sm text-accent-red">Не удалось загрузить чаты</p>
           )}
           {!isLoading && !isError && chats?.length === 0 && (
-            <p className="px-3 py-6 text-center text-sm text-text-muted">У вас пока нет чатов</p>
+            <EmptyChats onCreate={() => setModalOpen(true)} />
           )}
 
           {pinned.length > 0 && (

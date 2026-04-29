@@ -6,6 +6,7 @@ import { Avatar } from '../components/Avatar';
 import { ChatInfoDrawer } from '../components/chat/ChatInfoDrawer';
 import { MessageComposer } from '../components/chat/MessageComposer';
 import { MessageList } from '../components/chat/MessageList';
+import { NoChatSelected } from '../components/empty/EmptyStates';
 import { useChat } from '../hooks/useChats';
 import { useMarkChatRead } from '../hooks/useMarkChatRead';
 import { useMessages } from '../hooks/useMessages';
@@ -45,14 +46,7 @@ export function ChatPage() {
   }, [chatId]);
 
   if (!valid) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-8 text-center text-text-muted">
-        <div>
-          <p className="text-lg font-medium text-text-main">Выберите чат</p>
-          <p className="mt-2 text-sm">Выберите один из доступных чатов в списке</p>
-        </div>
-      </div>
-    );
+    return <NoChatSelected />;
   }
 
   const subtitle =

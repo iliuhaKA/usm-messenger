@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { KeyRound, UserRound } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useLogin } from '../hooks/useAuth';
 import { cn } from '../utils/cn';
@@ -28,23 +28,28 @@ export function LoginPage() {
     );
   };
 
-  const err = login.isError && axios.isAxiosError(login.error)
-    ? String(login.error.response?.data?.message ?? login.error.message)
-    : null;
+  const err =
+    login.isError && axios.isAxiosError(login.error)
+      ? String(login.error.response?.data?.message ?? login.error.message)
+      : null;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--color-login-bg)] px-4 py-10">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-40 bg-center"
-        style={{
-          backgroundImage: "url('/usm-bg.png')",
-        }}
-      />
+    <div
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10"
+      style={{
+        background:
+          'radial-gradient(ellipse at top, rgba(45,90,39,0.95) 0%, rgba(26,61,31,1) 60%, rgba(15,40,18,1) 100%)',
+      }}
+    >
+      {/* Декоративные мягкие пятна для глубины */}
+      <div className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 bottom-12 h-80 w-80 rounded-full bg-emerald-300/10 blur-3xl" />
 
-      <div className="relative z-10 w-full max-w-md rounded-3xl bg-white px-8 py-10 shadow-2xl">
+      <div className="relative z-10 w-full max-w-md rounded-3xl bg-white px-8 py-10 shadow-2xl ring-1 ring-black/5">
         <div className="mb-6 flex flex-col items-center text-center">
-          <img src="/usm.png" alt="" className="mb-4 h-14 w-14" />
-          <h1 className="text-xl font-bold text-text-main">Войти в систему</h1>
+          <img src="/usm.png" alt="USM" className="mb-4 h-14 w-14" />
+          <h1 className="text-xl font-bold text-text-main">Добро пожаловать</h1>
+          <p className="mt-1 text-sm text-text-muted">Войдите в USMessenger</p>
         </div>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
@@ -60,7 +65,7 @@ export function LoginPage() {
                 type="text"
                 autoComplete="username"
                 className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-text-muted"
-                placeholder="Введите логин или емаил"
+                placeholder="Логин или email"
                 value={loginField}
                 onChange={(e) => setLoginField(e.target.value)}
               />
@@ -79,17 +84,11 @@ export function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-text-muted"
-                placeholder="Введите пароль"
+                placeholder="Пароль"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-          </div>
-
-          <div className="flex min-h-[17px] justify-center">
-            <Link to="#" className="text-xs text-primary/80 hover:underline" onClick={(e) => e.preventDefault()}>
-              Забыли пароль?
-            </Link>
           </div>
 
           {err && <p className="text-center text-sm text-accent-red">{err}</p>}
@@ -98,9 +97,9 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={login.isPending}
-              className="rounded-full bg-primary px-12 py-2.5 text-sm font-semibold text-white shadow hover:opacity-90 disabled:opacity-60"
+              className="rounded-full bg-primary px-12 py-2.5 text-sm font-semibold text-white shadow transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {login.isPending ? '…' : 'Войти'}
+              {login.isPending ? 'Входим…' : 'Войти'}
             </button>
           </div>
         </form>
