@@ -8,6 +8,7 @@ function mapListItem(raw: Record<string, unknown>): ChatListItem {
     name: String(raw.name),
     type: raw.type as ChatListItem['type'],
     avatarUrl: (raw.avatarUrl as string) ?? null,
+    avatarFileId: (raw.avatarFileId as string) ?? null,
     lastMessage: (raw.lastMessage as string) ?? null,
     lastMessageTime: (raw.lastMessageTime as string) ?? null,
     unreadCount: Number(raw.unreadCount ?? 0),
@@ -24,6 +25,7 @@ function mapChatDetail(raw: Record<string, unknown>): ChatDetail {
     type: raw.type as ChatDetail['type'],
     description: (raw.description as string) ?? null,
     avatarUrl: (raw.avatarUrl as string) ?? null,
+    avatarFileId: (raw.avatarFileId as string) ?? null,
     createdAt: String(raw.createdAt),
     memberCount: Number(raw.memberCount ?? 0),
     unreadCount: Number(raw.unreadCount ?? 0),
@@ -58,4 +60,33 @@ export async function muteChat(chatId: number, muted: boolean): Promise<void> {
 
 export async function markChatRead(chatId: number): Promise<void> {
   await axiosInstance.post(`/chats/${chatId}/read`, {});
+}
+
+export async function updateChat(
+  chatId: number,
+  body: { name?: string; description?: string }
+): Promise<ChatDetail> {
+  const { data } = await axiosInstance.patch<Record<string, unknown>>(`/chats/${chatId}`, body);
+  return mapChatDetail(data);
+}
+
+export async function setChatAvatar(chatId: number, fileId: string): Promise<ChatDetail> {
+  const { data } = await axiosInstance.put<Record<string, unknown>>(
+    `/chats/${chatId}/avatar`,
+    null,
+    { params: { fileId } }
+  );
+  return mapChatDetail(data);
+}
+
+export async function addChatMember(chatId: number, userId: number): Promise<void> {
+  await axiosInstance.post(`/chats/${chatId}/members/${userId}`);
+}
+
+export async function removeChatMember(chatId: number, userId: number): Promise<void> {
+  await axiosInstance.delete(`/chats/${chatId}/members/${userId}`);
+}
+
+export async function deleteChat(chatId: number): Promise<void> {
+  await axiosInstance.delete(`/chats/${chatId}`);
 }

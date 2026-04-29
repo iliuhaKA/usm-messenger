@@ -21,6 +21,8 @@ export interface ChatMemberPreview {
   lastName: string;
   email?: string;
   role: string;
+  /** Роль в данном чате: ADMIN | MEMBER. Заполняется только когда юзер выдаётся как член чата. */
+  chatRole?: string | null;
   avatarUrl?: string | null;
   avatarFileId?: string | null;
   lastSeen?: string | null;

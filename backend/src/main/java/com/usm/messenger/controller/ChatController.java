@@ -3,12 +3,15 @@ package com.usm.messenger.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -17,6 +20,7 @@ import com.usm.messenger.dto.request.CreateChatRequest;
 import com.usm.messenger.dto.request.MuteRequest;
 import com.usm.messenger.dto.request.PinRequest;
 import com.usm.messenger.dto.request.SendMessageRequest;
+import com.usm.messenger.dto.request.UpdateChatRequest;
 import com.usm.messenger.dto.response.ChatListItemResponse;
 import com.usm.messenger.dto.response.ChatResponse;
 import com.usm.messenger.dto.response.MessageResponse;
@@ -84,6 +88,53 @@ public class ChatController {
     @PostMapping("/{chatId}/read")
     public ResponseEntity<Void> markRead(@PathVariable Long chatId, @AuthenticationPrincipal AuthenticatedUser me) {
         messageService.markChatAsRead(chatId, me.id());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ChatResponse> updateChat(
+        @PathVariable Long id,
+        @AuthenticationPrincipal AuthenticatedUser me,
+        @RequestBody UpdateChatRequest body
+    ) {
+        return ResponseEntity.ok(chatService.updateChat(id, me.id(), body));
+    }
+
+    @PutMapping("/{id}/avatar")
+    public ResponseEntity<ChatResponse> setAvatar(
+        @PathVariable Long id,
+        @AuthenticationPrincipal AuthenticatedUser me,
+        @RequestParam("fileId") String fileId
+    ) {
+        return ResponseEntity.ok(chatService.setChatAvatar(id, me.id(), fileId));
+    }
+
+    @PostMapping("/{id}/members/{userId}")
+    public ResponseEntity<Void> addMember(
+        @PathVariable Long id,
+        @PathVariable Long userId,
+        @AuthenticationPrincipal AuthenticatedUser me
+    ) {
+        chatService.addMember(id, me.id(), userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/members/{userId}")
+    public ResponseEntity<Void> removeMember(
+        @PathVariable Long id,
+        @PathVariable Long userId,
+        @AuthenticationPrincipal AuthenticatedUser me
+    ) {
+        chatService.removeMember(id, me.id(), userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteChat(
+        @PathVariable Long id,
+        @AuthenticationPrincipal AuthenticatedUser me
+    ) {
+        chatService.deleteChat(id, me.id());
         return ResponseEntity.noContent().build();
     }
 }

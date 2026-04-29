@@ -19,4 +19,6 @@ public class UserResponse {
     private String avatarUrl;
     private String avatarFileId;
     private LocalDateTime lastSeen;
+    /** Роль в конкретном чате (ADMIN/MEMBER) — заполняется только когда DTO выдаётся как член чата. */
+    private String chatRole;
 }

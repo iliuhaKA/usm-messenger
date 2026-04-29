@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.usm.messenger.dto.request.CreateChatRequest;
+import com.usm.messenger.dto.request.UpdateChatRequest;
 import com.usm.messenger.dto.response.ChatListItemResponse;
 import com.usm.messenger.dto.response.ChatResponse;
+import com.usm.messenger.dto.response.UserResponse;
 import com.usm.messenger.entity.Chat;
 import com.usm.messenger.entity.ChatMember;
 import com.usm.messenger.entity.User;
@@ -94,10 +96,86 @@ public class ChatService {
         dto.setMuted(Boolean.TRUE.equals(membership.getIsMuted()));
         dto.setMemberCount(chat.getMembers().size());
         dto.setMembers(chat.getMembers().stream()
-            .map(m -> userService.toUserResponse(m.getUser()))
+            .map(m -> {
+                UserResponse u = userService.toUserResponse(m.getUser());
+                u.setChatRole(m.getRole() != null ? m.getRole().name() : null);
+                return u;
+            })
             .collect(Collectors.toList()));
 
         return dto;
+    }
+
+    @Transactional
+    public ChatResponse updateChat(Long chatId, Long userId, UpdateChatRequest request) {
+        ensureAdmin(chatId, userId);
+        Chat chat = chatRepository.findById(chatId)
+            .orElseThrow(() -> new AccessDeniedException("Chat not found: " + chatId));
+        if (request.getName() != null) chat.setName(request.getName().trim());
+        if (request.getDescription() != null) chat.setDescription(request.getDescription().trim());
+        chatRepository.save(chat);
+        return getChatById(chatId, userId);
+    }
+
+    @Transactional
+    public ChatResponse setChatAvatar(Long chatId, Long userId, String avatarFileId) {
+        ensureAdmin(chatId, userId);
+        Chat chat = chatRepository.findById(chatId)
+            .orElseThrow(() -> new AccessDeniedException("Chat not found: " + chatId));
+        chat.setAvatarFileId(avatarFileId);
+        chatRepository.save(chat);
+        return getChatById(chatId, userId);
+    }
+
+    @Transactional
+    public void addMember(Long chatId, Long actorId, Long newUserId) {
+        ensureAdmin(chatId, actorId);
+        if (chatMemberRepository.existsByUserIdAndChatId(newUserId, chatId)) return;
+        Chat chat = chatRepository.findById(chatId)
+            .orElseThrow(() -> new AccessDeniedException("Chat not found: " + chatId));
+        User user = userRepository.findById(newUserId)
+            .orElseThrow(() -> new UserNotFoundException("User not found: " + newUserId));
+        ChatMember cm = ChatMember.builder()
+            .user(user)
+            .chat(chat)
+            .role(ChatRoles.MEMBER)
+            .joinedAt(LocalDateTime.now())
+            .isPinned(false)
+            .isMuted(false)
+            .lastReadAt(LocalDateTime.now())
+            .build();
+        chatMemberRepository.save(cm);
+    }
+
+    @Transactional
+    public void removeMember(Long chatId, Long actorId, Long targetUserId) {
+        // Сам себя — может убрать (выход). Чужого — только админ.
+        if (!actorId.equals(targetUserId)) {
+            ensureAdmin(chatId, actorId);
+        } else if (!chatMemberRepository.existsByUserIdAndChatId(actorId, chatId)) {
+            throw new AccessDeniedException("Not a member of chat: " + chatId);
+        }
+        ChatMember cm = chatMemberRepository.findByUserIdAndChatId(targetUserId, chatId)
+            .orElseThrow(() -> new AccessDeniedException("User is not a member"));
+        chatMemberRepository.delete(cm);
+        unreadCache.invalidate(targetUserId, chatId);
+    }
+
+    @Transactional
+    public void deleteChat(Long chatId, Long actorId) {
+        ensureAdmin(chatId, actorId);
+        Chat chat = chatRepository.findById(chatId)
+            .orElseThrow(() -> new AccessDeniedException("Chat not found: " + chatId));
+        // Postgres FK с ON DELETE CASCADE сам удалит messages и chats_members.
+        chatRepository.delete(chat);
+    }
+
+    private void ensureAdmin(Long chatId, Long userId) {
+        ChatMember cm = chatMemberRepository.findByUserIdAndChatId(userId, chatId)
+            .orElseThrow(() -> new AccessDeniedException("Access denied to chat: " + chatId));
+        if (cm.getRole() != ChatRoles.ADMIN) {
+            throw new AccessDeniedException("Only admin can perform this action");
+        }
     }
 
     public ChatResponse createChat(CreateChatRequest request, Long creatorId){
