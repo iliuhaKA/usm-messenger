@@ -1,5 +1,6 @@
 package com.usm.messenger.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,16 +14,16 @@ import java.util.Map;
 public class HealthController {
 
     @GetMapping("/health")
-    public Map<String, Object> health() {
+    public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "UP");
         response.put("timestamp", LocalDateTime.now());
         response.put("message", "USM Messenger API is running");
-        return response;
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/ping")
-    public String ping() {
-        return "pong";
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
     }
 }

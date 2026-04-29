@@ -9,5 +9,7 @@ import com.usm.messenger.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findById(Long id);
     Optional<User> findByIdnp(String idnp);
+
+    Optional<User> findByEmailIgnoreCase(String email);
     List<User> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName);
 }
