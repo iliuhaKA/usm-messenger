@@ -1,0 +1,478 @@
+{
+  "info": {
+    "name": "USM Messenger API",
+    "_postman_id": "a7b3c4d5-6e7f-4890-9012-3456789abcde",
+    "description": "Полная коллекция REST-эндпоинтов USM Messenger.\n\n## Установка\n\n1. Импортируй файл в Postman (File → Import).\n2. Запусти бэкенд: `docker compose up -d` (или локально через `mvn spring-boot:run`).\n3. **Важно (HTTPS / self-signed):** Postman → Settings → General → выключить **SSL certificate verification**.\n4. Открой запрос **Auth → Login** и выполни — токен автоматически сохранится в переменную `{{token}}`.\n5. Остальные запросы готовы к использованию.\n\n## Тестовые пользователи (seed из V2 миграции)\n\nПароль для всех: `Demo123!`\n\n| Login (email или ИДНП) | Роль |\n|---|---|\n| `admin@usm.md` или `2001123456789` | ADMIN |\n| `ana.popescu@usm.md` или `2002987654321` | STUDENT |\n| `ion.munteanu@usm.md` или `2003111222333` | STUDENT |\n| `victor.ceban@usm.md` или `1990555666777` | TEACHER |\n\n## Переменные коллекции\n\n- `baseUrl` — `https://localhost:8443`\n- `token` — JWT (заполняется автоматически после Login)\n- `chatId`, `userId`, `fileId`, `attachmentId` — для удобства подставляются в пути",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://localhost:8443", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "userId", "value": "1", "type": "string" },
+    { "key": "chatId", "value": "1", "type": "string" },
+    { "key": "fileId", "value": "", "type": "string" },
+    { "key": "attachmentId", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Ping",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/ping", "host": ["{{baseUrl}}"], "path": ["api", "ping"] }
+          }
+        },
+        {
+          "name": "Health",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/health", "host": ["{{baseUrl}}"], "path": ["api", "health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.token) {",
+                  "  pm.collectionVariables.set('token', res.token);",
+                  "  console.log('Saved token, expires at: ' + new Date(res.expiresAtEpochMs).toISOString());",
+                  "  if (res.user && res.user.id) {",
+                  "    pm.collectionVariables.set('userId', String(res.user.id));",
+                  "  }",
+                  "}",
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('token present', () => pm.expect(res.token).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"admin@usm.md\",\n  \"password\": \"Demo123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "description": "Поле `login` принимает либо email (содержит `@`), либо ИДНП. Ответ кладёт JWT в `{{token}}`."
+          }
+        },
+        {
+          "name": "Login (student)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"ana.popescu@usm.md\",\n  \"password\": \"Demo123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Login by IDNP",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"2001123456789\",\n  \"password\": \"Demo123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get current user (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"] }
+          }
+        },
+        {
+          "name": "Update profile",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Admin\",\n  \"lastName\": \"USM\",\n  \"email\": \"admin@usm.md\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"] }
+          }
+        },
+        {
+          "name": "Change password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Demo123!\",\n  \"newPassword\": \"NewPass123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/users/me/password", "host": ["{{baseUrl}}"], "path": ["api", "users", "me", "password"] }
+          }
+        },
+        {
+          "name": "Set my avatar",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me/avatar?fileId={{fileId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me", "avatar"],
+              "query": [{ "key": "fileId", "value": "{{fileId}}" }]
+            },
+            "description": "fileId — id из MongoDB, возвращённый POST /api/files/avatars/user."
+          }
+        },
+        {
+          "name": "List all users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api", "users"] }
+          }
+        },
+        {
+          "name": "Get user by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Search users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?q=ana",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "search"],
+              "query": [{ "key": "q", "value": "ana" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chats",
+      "item": [
+        {
+          "name": "List my chats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/chats", "host": ["{{baseUrl}}"], "path": ["api", "chats"] }
+          }
+        },
+        {
+          "name": "Create chat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const r = pm.response.json();",
+                  "if (r && r.id) { pm.collectionVariables.set('chatId', String(r.id)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Тестовый чат\",\n  \"type\": \"GROUP\",\n  \"description\": \"Создан через Postman\",\n  \"memberIds\": [2, 3]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/chats", "host": ["{{baseUrl}}"], "path": ["api", "chats"] },
+            "description": "type: GROUP, DIRECT или CHANNEL. Создатель добавляется автоматически."
+          }
+        },
+        {
+          "name": "Get chat by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}"] }
+          }
+        },
+        {
+          "name": "Update chat",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Новое название\",\n  \"description\": \"Обновлённое описание\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}"] }
+          }
+        },
+        {
+          "name": "Delete chat",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}"] }
+          }
+        },
+        {
+          "name": "Chat members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}/members", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}", "members"] }
+          }
+        },
+        {
+          "name": "Add member",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}/members/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}", "members", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Remove member",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}/members/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}", "members", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Pin chat",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"pinned\": true }" },
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}/pin", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}", "pin"] }
+          }
+        },
+        {
+          "name": "Mute chat",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"muted\": true }" },
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}/mute", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}", "mute"] }
+          }
+        },
+        {
+          "name": "Set chat avatar",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chats/{{chatId}}/avatar?fileId={{fileId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chats", "{{chatId}}", "avatar"],
+              "query": [{ "key": "fileId", "value": "{{fileId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get chat messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}/messages", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}", "messages"] }
+          }
+        },
+        {
+          "name": "Send message",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello from Postman!\",\n  \"attachmentId\": null\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}/messages", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}", "messages"] },
+            "description": "content — текст. attachmentId опционален (предварительно загрузить файл через POST /api/files/attachments)."
+          }
+        },
+        {
+          "name": "Mark chat as read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/chats/{{chatId}}/read", "host": ["{{baseUrl}}"], "path": ["api", "chats", "{{chatId}}", "read"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "Upload attachment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const r = pm.response.json();",
+                  "if (r && r.id) { pm.collectionVariables.set('attachmentId', String(r.id)); }",
+                  "if (r && r.fileId) { pm.collectionVariables.set('fileId', r.fileId); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "chatId", "value": "{{chatId}}", "type": "text" },
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/files/attachments", "host": ["{{baseUrl}}"], "path": ["api", "files", "attachments"] },
+            "description": "multipart/form-data. Выбери реальный файл в поле `file` перед отправкой."
+          }
+        },
+        {
+          "name": "Upload user avatar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) { pm.collectionVariables.set('fileId', pm.response.text()); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/files/avatars/user", "host": ["{{baseUrl}}"], "path": ["api", "files", "avatars", "user"] },
+            "description": "Возвращает fileId (raw text). Затем PUT /api/users/me/avatar?fileId=..."
+          }
+        },
+        {
+          "name": "Upload chat avatar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/files/avatars/chat/{{chatId}}", "host": ["{{baseUrl}}"], "path": ["api", "files", "avatars", "chat", "{{chatId}}"] }
+          }
+        },
+        {
+          "name": "Download file",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/files/{{fileId}}", "host": ["{{baseUrl}}"], "path": ["api", "files", "{{fileId}}"] },
+            "description": "Возвращает бинарный поток. Postman → Send and Download для сохранения."
+          }
+        },
+        {
+          "name": "List chat attachments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/files/chats/{{chatId}}", "host": ["{{baseUrl}}"], "path": ["api", "files", "chats", "{{chatId}}"] }
+          }
+        },
+        {
+          "name": "Rename attachment",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"new-name.pdf\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/files/{{attachmentId}}", "host": ["{{baseUrl}}"], "path": ["api", "files", "{{attachmentId}}"] }
+          }
+        },
+        {
+          "name": "Delete attachment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/files/{{attachmentId}}", "host": ["{{baseUrl}}"], "path": ["api", "files", "{{attachmentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Presence",
+      "item": [
+        {
+          "name": "Get statuses by ids",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/presence?ids=1,2,3,4",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "presence"],
+              "query": [{ "key": "ids", "value": "1,2,3,4" }]
+            },
+            "description": "Возвращает Map<userId, ONLINE|OFFLINE>. Источник — Redis (presence:user:*, TTL 60s)."
+          }
+        }
+      ]
+    }
+  ]
+}
