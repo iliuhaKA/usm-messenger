@@ -54,4 +54,7 @@ public class Attachment {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "duration_ms")
+    private Long durationMs;
 }

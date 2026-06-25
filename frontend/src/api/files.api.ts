@@ -19,6 +19,22 @@ export async function uploadAttachment(file: File, chatId: number): Promise<Atta
   return data;
 }
 
+export async function uploadVoiceMessage(
+  file: File,
+  chatId: number,
+  durationMs: number
+): Promise<Attachment> {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('chatId', String(chatId));
+  form.append('durationMs', String(Math.max(0, Math.round(durationMs))));
+  form.append('voice', 'true');
+  const { data } = await axiosInstance.post<Attachment>('/files/attachments', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+}
+
 export async function uploadUserAvatar(file: File): Promise<string> {
   const form = new FormData();
   form.append('file', file);

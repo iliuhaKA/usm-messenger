@@ -40,9 +40,11 @@ public class FileController {
     public ResponseEntity<AttachmentResponse> uploadAttachment(
         @AuthenticationPrincipal AuthenticatedUser me,
         @RequestParam("chatId") Long chatId,
-        @RequestParam("file") MultipartFile file
+        @RequestParam("file") MultipartFile file,
+        @RequestParam(value = "durationMs", required = false) Long durationMs,
+        @RequestParam(value = "voice", required = false, defaultValue = "false") boolean voice
     ) throws IOException {
-        return ResponseEntity.ok(fileService.uploadAttachment(file, me.id(), chatId));
+        return ResponseEntity.ok(fileService.uploadAttachment(file, me.id(), chatId, durationMs, voice));
     }
 
     @PostMapping(path = "/avatars/user", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

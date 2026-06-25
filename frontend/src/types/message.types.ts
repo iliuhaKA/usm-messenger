@@ -5,6 +5,7 @@ export interface Attachment {
   mimeType: string;
   sizeBytes: number;
   uploadedById: number | null;
+  durationMs: number | null;
 }
 
 export interface Message {

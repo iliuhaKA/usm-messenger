@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
  *   ATTACHMENT  — вложение в чат
  *   AVATAR_USER — аватар пользователя
  *   AVATAR_CHAT — аватар чата
+ *   VOICE       — голосовое сообщение (хранится длительность durationMs)
  */
 @Document(collection = "file_metadata")
 @Data
@@ -47,4 +48,6 @@ public class FileMetadata {
     private String purpose;
 
     private Instant createdAt;
+
+    private Long durationMs;
 }

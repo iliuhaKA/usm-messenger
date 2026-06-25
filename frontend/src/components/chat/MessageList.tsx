@@ -8,6 +8,7 @@ import { formatMessageTime } from '../../lib/format';
 import { Avatar } from '../Avatar';
 import { EmptyMessages } from '../empty/EmptyStates';
 import { MessageSkeleton } from '../ui/Skeleton';
+import { VoiceMessagePlayer, isVoiceAttachment } from './VoiceMessage';
 
 function isImage(mime: string): boolean {
   return mime.startsWith('image/');
@@ -22,6 +23,16 @@ function formatSize(bytes: number): string {
 function AttachmentBlock({ attachment, mine }: { attachment: Attachment; mine: boolean }) {
   const url = getFileUrl(attachment.fileId);
   if (!url) return null;
+
+  if (isVoiceAttachment(attachment)) {
+    return (
+      <VoiceMessagePlayer
+        fileId={attachment.fileId}
+        durationMs={attachment.durationMs}
+        mine={mine}
+      />
+    );
+  }
 
   if (isImage(attachment.mimeType)) {
     return (

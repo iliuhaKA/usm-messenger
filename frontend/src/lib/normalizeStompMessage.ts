@@ -11,6 +11,7 @@ function normalizeAttachment(raw: unknown): Attachment | null {
     mimeType: String(o.mimeType ?? 'application/octet-stream'),
     sizeBytes: Number(o.sizeBytes ?? 0),
     uploadedById: o.uploadedById != null ? Number(o.uploadedById) : null,
+    durationMs: o.durationMs != null ? Number(o.durationMs) : null,
   };
 }
 

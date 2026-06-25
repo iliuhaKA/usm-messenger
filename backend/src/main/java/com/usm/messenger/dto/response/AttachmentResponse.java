@@ -16,4 +16,5 @@ public class AttachmentResponse {
     private String mimeType;
     private long sizeBytes;
     private Long uploadedById;
+    private Long durationMs;     // для голосовых сообщений
 }

@@ -43,6 +43,7 @@ public class FileService {
     public static final String PURPOSE_ATTACHMENT = "ATTACHMENT";
     public static final String PURPOSE_AVATAR_USER = "AVATAR_USER";
     public static final String PURPOSE_AVATAR_CHAT = "AVATAR_CHAT";
+    public static final String PURPOSE_VOICE = "VOICE";
 
     private final GridFsTemplate gridFs;
     private final FileMetadataRepository metadataRepo;
@@ -52,8 +53,18 @@ public class FileService {
 
     @Transactional
     public AttachmentResponse uploadAttachment(MultipartFile file, Long userId, Long chatId) throws IOException {
+        return uploadAttachment(file, userId, chatId, null, false);
+    }
+
+    @Transactional
+    public AttachmentResponse uploadAttachment(MultipartFile file,
+                                               Long userId,
+                                               Long chatId,
+                                               Long durationMs,
+                                               boolean voice) throws IOException {
         ensureMember(chatId, userId);
-        FileMetadata meta = storeBinary(file, userId, chatId, PURPOSE_ATTACHMENT);
+        String purpose = voice ? PURPOSE_VOICE : PURPOSE_ATTACHMENT;
+        FileMetadata meta = storeBinary(file, userId, chatId, purpose, durationMs);
 
         User uploader = userRepo.findById(userId)
             .orElseThrow(() -> new AccessDeniedException("User not found"));
@@ -65,6 +76,7 @@ public class FileService {
             .gridfsId(meta.getGridfsId())
             .uploadedBy(uploader)
             .createdAt(LocalDateTime.now())
+            .durationMs(durationMs)
             .build();
         a = attachmentRepo.save(a);
 
@@ -76,11 +88,11 @@ public class FileService {
         if (!PURPOSE_AVATAR_USER.equals(purpose) && !PURPOSE_AVATAR_CHAT.equals(purpose)) {
             throw new IllegalArgumentException("Unsupported avatar purpose: " + purpose);
         }
-        FileMetadata meta = storeBinary(file, userId, targetChatId, purpose);
+        FileMetadata meta = storeBinary(file, userId, targetChatId, purpose, null);
         return meta.getGridfsId();
     }
 
-    private FileMetadata storeBinary(MultipartFile file, Long ownerId, Long chatId, String purpose) throws IOException {
+    private FileMetadata storeBinary(MultipartFile file, Long ownerId, Long chatId, String purpose, Long durationMs) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Empty file");
         }
@@ -98,6 +110,7 @@ public class FileService {
                 .chatId(chatId)
                 .purpose(purpose)
                 .createdAt(Instant.now())
+                .durationMs(durationMs)
                 .build();
 
             return metadataRepo.save(meta);
@@ -175,6 +188,7 @@ public class FileService {
             .mimeType(a.getFileType())
             .sizeBytes(a.getFileSize() == null ? 0 : a.getFileSize())
             .uploadedById(a.getUploadedBy() != null ? a.getUploadedBy().getId() : null)
+            .durationMs(a.getDurationMs())
             .build();
     }
 
